@@ -1,0 +1,369 @@
+@import '/vendor/filament/filament/resources/css/theme.css';
+
+@config 'tailwind.config.js';
+
+@layer base {
+    html {
+        @apply text-sm font-normal antialiased;
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
+html * {
+    @apply !leading-tight;
+}
+
+.fi-layout {
+    /*@apply bg-fixed bg-no-repeat;
+    background-image: url('../../img/bg-dorsi-dash.png');
+    background-position-x: left;
+    background-position-y: bottom;*/
+    /*@apply bg-slate-200 dark:bg-slate-950;*/
+    @apply bg-primary-50 dark:bg-primary-950;
+    height: calc(100% - 56px) !important;
+}
+
+.fi-main {
+    @apply lg:!px-6;
+}
+
+.fi-main .fi-form-actions {
+    @apply fixed bottom-0 -ml-8 px-8 py-2 bg-white transition-all ease-in-out duration-300;
+    z-index: 2;
+    width: -webkit-fill-available;
+    --tw-drop-shadow: drop-shadow(0 10px 0 rgb(0 0 0 / .04)) drop-shadow(20px 0 10px rgb(0 0 0 / .1));
+    filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+
+.fi-main .fi-form-actions > div:first-child {
+    @apply justify-end;
+}
+
+.fi-simple-main .fi-form>div:first-child.fi-fo-component-ctn {
+    margin-bottom: 0;
+}
+
+.fi-page > section:first-child {
+    @apply !gap-y-4 !py-4;
+}
+
+.fi-page .gap-y-8 {
+    @apply !gap-y-4;
+}
+
+
+
+.fi-sidebar-nav {
+    @apply bg-white !px-5 !py-6 !shadow-xl !shadow-primary-200 hover:!shadow-2xl hover:!shadow-primary-300 transition-all duration-300;
+}
+
+.fi-sidebar-nav .fi-sidebar-nav-groups {
+    @apply gap-y-5;
+}
+
+.fi-sidebar-nav .fi-sidebar-nav-groups .fi-sidebar-item .fi-sidebar-item-button {
+    @apply px-1 py-1;
+}
+
+.fi-main-ctn .fi-topbar nav {
+    @apply !shadow-sm !shadow-blue-100;
+}
+
+
+
+.fi-form > div:first-child.fi-fo-component-ctn,
+.fi-resource-relation-managers {
+    @apply mb-14;
+}
+
+.fi-btn {
+    @apply transition-all;
+}
+
+.fi-btn:active {
+    @apply scale-90;
+}
+
+.fi-btn:hover {
+    @apply bg-slate-100;
+}
+
+.fi-topbar > nav > ul > .fi-topbar-item:first-child {
+    @apply hidden;
+}
+
+.fi-topbar .fi-dropdown-trigger.flex.cursor-pointer > button span:first-child {
+    padding: 0.5px 0 0 0.5px;
+}
+
+.fi-topbar .fi-dropdown-panel .fi-dropdown-list > a {
+    @apply hover:bg-primary-100;
+}
+
+.fi-topbar .fi-dropdown-panel .fi-dropdown-list > a >div.fi-badge {
+    @apply !w-8;
+}
+
+.choices__inner {
+    @apply !leading-5;
+}
+
+.choices__item--choice {
+    @apply py-1.5;
+}
+
+select.select-xs:not(.choices) {
+    background-image: none;
+    padding: 5px;
+    text-align: center;
+}
+
+.treeselect-list * {
+    @apply !text-sm !leading-5;
+}
+
+.treeselect-input {
+    min-height: 2rem !important;
+}
+
+.fi-ta-text,
+.fi-ta-toggle,
+.fi-ta-color,
+.fi-ta-icon,
+.fi-ta-image,
+.fi-ta-cell > .whitespace-nowrap.px-3.py-4,
+tr .fi-ta-cell:first-child > div:first-child,
+.fi-ta-text-summary
+{
+    @apply !px-1.5 !py-1;
+}
+
+.fi-input {
+    @apply !leading-5 !ps-1.5 !pe-1.5;
+}
+
+.fi-topbar > nav > ul {
+    @apply !gap-x-0.5;
+}
+
+.fi-topbar > nav > ul .fi-topbar-item > button {
+    @apply !gap-x-1 !px-2;
+}
+
+.fi-fo-tabs-tab.p-0 {
+    @apply !p-0;
+}
+
+.fi-fo-tabs-tab.p-6 {
+    @apply !p-3;
+}
+
+.fi-fo-repeater > div:first-child {
+    @apply !justify-end;
+}
+
+.fi-no-notification-body {
+    @apply !leading-5;
+}
+
+/*.fi-section-content,*/
+.fi-section:not(.fi-aside),
+.fi-fo-tabs,
+.fi-fo-repeater-item,
+.fi-fo-field-info-values {
+    @apply !shadow-sm !border-0 !ring-1 !ring-gray-950/5  dark:!ring-white/10 /*focus-within:!ring-primary-600 transition-all ease-in duration-200*/;
+}
+
+.fi-fo-repeater-item-header > h4 {
+    @apply !leading-8 !grow;
+}
+
+.fi-fo-repeater-item-content {
+    @apply !p-3;
+}
+
+.fi-section-content > div:first-child,
+.fi-fo-repeater-item-content > div:first-child {
+    @apply !gap-3;
+}
+
+.fi-form > div:first-child {
+    @apply !gap-y-4;
+}
+
+.fi-select-input {
+    @apply !leading-5;
+}
+
+.discounts > div:first-child {
+    @apply !gap-3;
+}
+
+.fi-fieldset {
+    @apply !p-4;
+}
+
+.fi-fieldset > div.gap-6 {
+    @apply !gap-3;
+}
+
+.fi-fo-component-ctn {
+    @apply !gap-4;
+}
+
+.fi-modal-header, .fi-modal-footer {
+    @apply !px-4 !py-3;
+}
+
+.fi-modal-content {
+    @apply !px-4 !py-3;
+}
+
+.fi-modal-content p[x-show="resourceLockOwner"] {
+    @apply mt-6 mb-2;
+}
+
+.filament-table-repeater-container {
+    @apply !rounded-lg !shadow-sm !ring-1 !transition !duration-75 focus-within:!ring-2 !bg-white dark:!bg-white/5 !ring-gray-950/10 focus-within:!ring-primary-600 dark:focus-within:ring-primary-500 dark:!ring-white/20;
+}
+
+.filament-table-repeater-header-column {
+    @apply !px-3 !py-2 !text-start !text-sm !font-medium !text-gray-700 !bg-white dark:!text-gray-200;
+}
+
+.filament-table-repeater-empty-row {
+    @apply !border-b !bg-red-50 dark:!border-red-500 dark:!bg-red-700;
+}
+
+.filament-table-repeater-empty-column {
+    @apply !text-center !text-red-900 !p-4 !not-italic text-sm;
+}
+
+.fi-fo-key-value .fi-ac-icon-btn-action {
+    @apply !w-14;
+}
+
+.fi-fo-key-value .fi-input {
+    @apply !px-3;
+}
+
+.filament-table-repeater-column > div:first-child {
+    @apply !gap-2;
+}
+
+.fi-fo-field-wrp-error-message:first-letter {
+    @apply !uppercase;
+}
+
+.fi-tabs,
+.fi-fo-repeater-item-header {
+    @apply !bg-gray-100 !rounded-xl !py-1 !px-4;
+}
+
+.fi-header-heading,
+.fi-breadcrumbs li a {
+    @apply !lowercase;
+}
+.fi-header-heading:first-letter,
+.fi-breadcrumbs li a::first-letter {
+    @apply !uppercase;
+}
+
+.fi-header-subheading {
+    @apply !text-base;
+}
+
+.fi-header-subheading:first-letter {
+    @apply !uppercase;
+}
+
+.choices__input {
+    @apply !leading-5;
+}
+
+/*.fi-dropdown-list-item-label {
+    @apply lowercase;
+}*/
+
+.fi-dropdown-list-item-label:first-letter {
+    @apply uppercase;
+}
+
+.fi-tenant-menu .fi-dropdown-panel .fi-dropdown-list:nth-child(2) .fi-dropdown-list-item-label {
+    @apply uppercase;
+}
+
+.filament-table-repeater-column {
+    @apply align-top;
+}
+
+.fi-fo-field-wrp-hint-icon {
+    @apply !h-4 !w-4;
+}
+
+.flatpickr-day {
+    @apply !leading-10;
+}
+
+.bg-sky {
+    @apply bg-sky-500;
+}
+
+.bg-indigo {
+    @apply bg-indigo-500;
+}
+
+.quick-create-component .fi-dropdown-trigger button:hover > * {
+    @apply !text-white;
+}
+
+.fi-modal-header > div.absolute:first-child {
+    @apply !absolute !end-3 !top-3;
+}
+
+.panel-switch-card {
+    @apply w-40 transition-all ease-in-out hover:scale-105;
+}
+
+.panel-switch-card-section {
+    @apply !mb-2;
+}
+
+/*.fi-topbar-with-navigation .fi-dropdown-panel .fi-dropdown-list-item-label {
+    @apply !lowercase;
+}
+
+.fi-topbar-with-navigation .fi-dropdown-panel .fi-dropdown-list-item-label:first-letter {
+    @apply !uppercase;
+}*/
+
+.fi-topbar > nav > ul .fi-topbar-item > a > span {
+    @apply !lowercase;
+}
+
+.fi-topbar > nav > ul .fi-topbar-item > a > span:first-letter {
+    @apply !uppercase;
+}
+
+/* MENU PRINCIPAL */
+.me-4.hidden.items-center.gap-x-4 .fi-dropdown-list .fi-dropdown-list-item .fi-dropdown-list-item-label {
+    @apply !lowercase;
+}
+
+.me-4.hidden.items-center.gap-x-4 .fi-dropdown-list .fi-dropdown-list-item .fi-dropdown-list-item-label:first-letter {
+    @apply !uppercase;
+}
+/* MENU PRINCIPAL */
+
+/*.hide-text .fi-btn-label {
+    @apply !hidden;
+}*/
+.hide-text > div,
+.hide-text > p,
+.hide-text > span {
+    @apply !hidden;
+}
+
+#inspecciones-items .fi-section-content .grid:first-child > div:first-child > div:first-child {
+    @apply !text-2xl !font-bold !text-slate-500;
+}

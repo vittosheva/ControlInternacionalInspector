@@ -1,0 +1,29 @@
+@import '/vendor/filament/filament/resources/css/theme.css';
+
+@config 'tailwind.config.js';
+
+@layer base {
+    html {
+        @apply text-sm font-normal antialiased;
+    }
+}
+
+.fi-sidebar-nav > ul.flex.flex-col {
+    @apply !gap-y-3;
+}
+
+.fi-sidebar-nav .fi-sidebar-group > div {
+    @apply !py-1;
+}
+
+.fi-sidebar-nav .fi-sidebar-group .fi-sidebar-group-items .fi-sidebar-item-button {
+    @apply !py-1.5;
+}
+
+.fi-sidebar-group-items .fi-sidebar-item-button .fi-sidebar-item-label {
+    @apply !lowercase;
+}
+
+.fi-sidebar-group-items .fi-sidebar-item-button .fi-sidebar-item-label:first-letter {
+    @apply !uppercase;
+}

@@ -1,0 +1,9 @@
+*
+!.gitignore
+!DorsiSoft/
+!DorsiSoft/*
+!comprobantes/
+!public/
+
+# macOS Files
+.DS_Store
