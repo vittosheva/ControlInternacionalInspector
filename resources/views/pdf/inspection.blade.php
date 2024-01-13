@@ -131,13 +131,3 @@
 <th class="thead-th-inner !text-[5pt]" colspan="2">Observaciones ambientales</th>
 <th class="thead-th-inner !text-[5pt]" colspan="3">Observaciones cumplimiento baños</th>
 --}}
-
-{{--
-@foreach($record->complementaryServices as $complementaryService)
-    <tr>
-        <td class="tbody-td-thin-tiny !text-center">{{ $loop->iteration }}</td>
-        <td class="tbody-td-thin-tiny !text-center">{{ $complementaryService->complete == 1 ? '✓' : 'X' }}</td>
-        <td class="tbody-td-thin-tiny" colspan="3">{{ $complementaryService->complementaryService->description ?? '-' }}</td>
-    </tr>
-@endforeach
---}}
