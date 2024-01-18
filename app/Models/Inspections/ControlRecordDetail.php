@@ -46,5 +46,4 @@ class ControlRecordDetail extends Model
     {
         return $this->belongsTo(Observation::class, 'company_observation_id');
     }
-
 }

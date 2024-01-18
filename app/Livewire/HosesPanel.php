@@ -30,11 +30,6 @@ class HosesPanel extends Component implements HasForms
 {
     use InteractsWithForms;
 
-    protected $listeners = [
-        'openHoseInfo',
-        'addControl',
-    ];
-
     public ?array $data = [];
 
     public array $observations = [];
@@ -54,6 +49,12 @@ class HosesPanel extends Component implements HasForms
     public Collection $dataCollection;
 
     public ?string $selectedHose = null;
+
+    protected $listeners = [
+        'openHoseInfo',
+        'addControl',
+        'clearHoses',
+    ];
 
     public function mount(ControlRecordDetail $controlRecordDetail, $operation, $companyId, $stationId): void
     {
@@ -207,7 +208,7 @@ class HosesPanel extends Component implements HasForms
                             ->dehydrated()
                             ->afterStateHydrated(function (Select $component, ?string $state) {
                                 if (! empty($this->selectedHose) && empty($state) || empty($this->measurements)) {
-                                    return $component->state(0);
+                                    return $component->state(7);
                                 }
 
                                 return $component->state($state);
@@ -219,7 +220,7 @@ class HosesPanel extends Component implements HasForms
                             ->live()
                             ->afterStateHydrated(function (Select $component, ?string $state) {
                                 if (! empty($this->selectedHose) && empty($state)) {
-                                    return $component->state(0);
+                                    return $component->state(7);
                                 }
 
                                 return $component->state($state);
@@ -347,12 +348,18 @@ class HosesPanel extends Component implements HasForms
         ]);
     }
 
-    protected function getHoses(): \Illuminate\Database\Eloquent\Collection|array
+    public function clearHoses($stationId): void
+    {
+        $this->hoses = $this->getHoses($stationId);
+        $this->dataCollection = collect();
+    }
+
+    protected function getHoses($stationId = null): \Illuminate\Database\Eloquent\Collection|array
     {
         return Hose::query()
             ->with('type')
             ->where('company_id', '=', $this->companyId)
-            ->where('station_id', '=', $this->stationId)
+            ->where('station_id', '=', $stationId ?? $this->stationId)
             ->orderBy('name')
             ->get();
     }

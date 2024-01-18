@@ -141,6 +141,10 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
 
     public function canAccessPanel(Panel $panel): bool
     {
+        if ($this->is_super && $this->isSuperAdmin()) {
+            return true;
+        }
+
         if (! $this->hasVerifiedEmail()) {
             return false;
         }

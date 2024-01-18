@@ -26,7 +26,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach($record->details as $item)
+                                        @foreach ($record->details as $item)
                                         <tr class="border-b dark:border-gray-700">
                                             <td class="px-4 py-3">{{ $loop->iteration }}</td>
                                             <td class="px-4 py-3">{{ $item->hose->name }}</td>

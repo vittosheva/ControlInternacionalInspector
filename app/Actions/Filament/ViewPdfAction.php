@@ -28,7 +28,6 @@ class ViewPdfAction extends Action
                 'record' => $optimus->encode($record->getAttributeValue('id')),
             ]),
                 shouldOpenInNewTab: true
-            )
-            ->visible(fn (Model $record) => ! empty($record->pdf) && Storage::disk('pdfs')->exists($record->pdf));
+            );
     }
 }

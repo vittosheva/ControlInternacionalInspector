@@ -13,6 +13,7 @@ export default {
         './vendor/filament/**/*.blade.php',
         './vendor/jaocero/radio-deck/resources/views/**/*.blade.php',
         './vendor/kenepa/resource-lock/resources/**/*.blade.php',
+        './vendor/lara-zeus/matrix-choice/resources/views/**/*.blade.php',
         './resources/views/vendor/*.blade.php',
         './resources/views/vendor/filament-panel-switch/panel-switch-menu.blade.php',
         './resources/views/filament/**/*.blade.php',

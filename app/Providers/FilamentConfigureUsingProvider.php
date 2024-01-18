@@ -126,6 +126,18 @@ class FilamentConfigureUsingProvider extends ServiceProvider
             $createAction->keyBindings(['F6']);
         });
 
+        \Filament\Actions\EditAction::configureUsing(function (\Filament\Actions\EditAction $editAction): void {
+            $editAction
+                ->requiresConfirmation()
+                ->visible(auth()->user()->isAdmin());
+        });
+
+        \Filament\Tables\Actions\EditAction::configureUsing(function (\Filament\Tables\Actions\EditAction $editAction): void {
+            $editAction
+                ->requiresConfirmation()
+                ->visible(auth()->user()->isAdmin());
+        });
+
         // CUSTOMS
         Flatpickr::configureUsing(function (Flatpickr $flatpickr): void {
             $flatpickr

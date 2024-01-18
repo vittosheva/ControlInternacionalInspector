@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Pdf\GenerateController;
 use App\Http\Controllers\Pdf\ViewController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------

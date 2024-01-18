@@ -20,7 +20,7 @@ return [
 
     'guard_names' => [
         'web' => 'web',
-        'api' => 'api',
+        //'api' => 'api',
     ],
 
     'toggleable_guard_names' => [
@@ -96,9 +96,8 @@ return [
          */
         'model_directories' => [
             app_path('Models'),
-            app_path('Models/Common'),
             app_path('Models/Core'),
-            app_path('Models/Inventory'),
+            app_path('Models/Inspections'),
             app_path('Models/Persona'),
         ],
 
@@ -116,20 +115,6 @@ return [
             \App\Models\Common\CategoryType::class,
             \App\Models\Common\IdentificationType::class,
 
-            App\Models\Core\CompanySetting::class,
-            App\Models\Core\CompanyUser::class,
-            App\Models\Core\Media::class,
-
-            \App\Models\Locale\City::class,
-            \App\Models\Locale\Country::class,
-            \App\Models\Locale\Currency::class,
-            \App\Models\Locale\State::class,
-        ],
-
-        'excluded_policy_models' => [
-            \App\Models\Common\CategoryType::class,
-            \App\Models\Common\IdentificationType::class,
-
             \App\Models\Core\CompanySetting::class,
             \App\Models\Core\CompanyUser::class,
             \App\Models\Core\Media::class,
@@ -140,14 +125,22 @@ return [
             \App\Models\Locale\State::class,
         ],
 
+        'excluded_policy_models' => [
+            \App\Models\Core\Company::class,
+            \App\Models\Core\CompanySetting::class,
+            \App\Models\Core\CompanyUser::class,
+            \App\Models\Core\Department::class,
+            \App\Models\Core\Media::class,
+
+            \App\Models\Persona\Customer::class,
+        ],
+
         /*
          * Define any other permission that should be synced with the DB
          */
         'custom_permissions' => [
             ...config('dorsi.filament.modules.permissions'),
             'consume Webservice',
-            'unlock Panel',
-            'unlock Resource',
         ],
 
         'user_model' => \App\Models\Persona\User::class,

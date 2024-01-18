@@ -5,7 +5,6 @@ namespace App\Filament\SuperAdmin\Resources;
 use App\Filament\SuperAdmin\Resources\UserResource\Pages\CreateUser;
 use App\Filament\SuperAdmin\Resources\UserResource\Pages\EditUser;
 use App\Filament\SuperAdmin\Resources\UserResource\Pages\ListUsers;
-use App\Filament\SuperAdmin\Resources\UserResource\RelationManagers\CompaniesRelationManager;
 use App\Forms\Components\EmailTextInput;
 use App\Forms\Components\IsActiveToggle;
 use App\Forms\Components\IsAllowedToLoginToggle;
@@ -30,7 +29,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
 use Phpsa\FilamentPasswordReveal\Password;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
-use Tapp\FilamentAuthenticationLog\RelationManagers\AuthenticationLogsRelationManager;
 
 class UserResource extends Resource
 {
@@ -59,7 +57,8 @@ class UserResource extends Resource
                             ->columnSpan(null)
                             ->required(),
                         IsAllowedToLoginToggle::make('is_allowed_to_login')
-                            ->inline(false),
+                            ->inline(false)
+                            ->visible(! auth()->user()->isSuperAdmin()),
                         IsActiveToggle::make('is_active')
                             ->inline(false),
                     ])->columns(3),
@@ -124,17 +123,17 @@ class UserResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->with('roles')
             ->withoutGlobalScopes([
                 IsActiveScope::class,
-            ]);
+            ])
+            ->where('is_super', '=', 0);
     }
 
     public static function getRelations(): array
     {
         return [
-            CompaniesRelationManager::class,
             AuditsRelationManager::class,
-            AuthenticationLogsRelationManager::class,
         ];
     }
 

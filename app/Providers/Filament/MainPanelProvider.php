@@ -5,7 +5,7 @@ namespace App\Providers\Filament;
 use Althinect\FilamentSpatieRolesPermissions\Middleware\SyncSpatiePermissionsWithFilamentTenants;
 use App\Filament\Main\Pages\Auth\Login;
 use App\Filament\Main\Pages\Dashboard;
-use App\Filament\Main\Resources\ControlResource;
+use App\Filament\Main\Resources\InspectionResource;
 use App\Http\Middleware\DocumentPrefixes;
 use App\Http\Middleware\FilamentAssets;
 use App\Http\Middleware\HtmlMinifier;
@@ -14,6 +14,7 @@ use Awcodes\FilamentQuickCreate\QuickCreatePlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -84,6 +85,7 @@ class MainPanelProvider extends PanelProvider
             ->sidebarWidth('17rem')
             //->sidebarCollapsibleOnDesktop()
             ->sidebarFullyCollapsibleOnDesktop()
+            ->collapsibleNavigationGroups()
             ->darkMode(false)
             ->maxContentWidth(MaxWidth::Full)
             ->viteTheme('resources/css/filament/admin/theme.css')
@@ -113,19 +115,23 @@ class MainPanelProvider extends PanelProvider
                 'primary' => config('dorsi.filament.modules.colors.main'),
             ])
             ->navigationGroups([
-                //
+                NavigationGroup::make()->label(__('Controls')),
+                NavigationGroup::make()->label(__('Observation & Services')),
+                NavigationGroup::make()->label(__('Variables')),
             ])
             ->navigationItems([
-                NavigationItem::make(fn () => __('Inspections'))
-                    ->url(fn () => ControlResource::getUrl('index'))
-                    ->group(fn () => __('Controls'))
-                    ->icon('heroicon-o-magnifying-glass')
-                    ->isActiveWhen(fn () => Route::current()->getName() === 'filament.main.resources.controls.index'),
                 NavigationItem::make(fn () => __('New Inspection'))
-                    ->url(fn () => ControlResource::getUrl('create'))
+                    ->url(fn () => InspectionResource::getUrl('create'))
                     ->group(fn () => __('Controls'))
                     ->icon('heroicon-o-plus')
-                    ->isActiveWhen(fn () => Route::current()->getName() === 'filament.main.resources.controls.create'),
+                    ->isActiveWhen(fn () => Route::current()->getName() === 'filament.main.resources.inspections.create')
+                    ->visible(fn () => auth()->user()->can('create ControlRecord')),
+                NavigationItem::make(fn () => __('Inspections'))
+                    ->url(fn () => InspectionResource::getUrl())
+                    ->group(fn () => __('Controls'))
+                    ->icon('heroicon-o-magnifying-glass')
+                    ->isActiveWhen(fn () => Route::current()->getName() === 'filament.main.resources.inspections.index')
+                    ->visible(fn () => auth()->user()->can('view-any ControlRecord')),
             ]);
     }
 }

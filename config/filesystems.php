@@ -9,7 +9,7 @@ return [
     |
     | Here you may specify the default filesystem disk that should be used
     | by the framework. The "local" disk, as well as a variety of cloud
-    | based disks are available to your application. Just store away!
+    | based disks, are available to your application. Store away!
     |
     */
 
@@ -56,118 +56,26 @@ return [
             'throw' => false,
         ],
 
-        /*
-         * Images
-         */
-        'logo_images' => [
+        'inspections_pdf' => [
             'driver' => 'local',
-            'root' => storage_path('app/public/logos'),
-            'url' => env('APP_URL').'/storage/logos',
-            'visibility' => 'private',
-            'throw' => false,
-        ],
-
-        'avatar_images' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public/avatars'),
-            'url' => env('APP_URL').'/storage/avatars',
-            'visibility' => 'private',
-            'throw' => false,
-        ],
-
-        'item_images' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public/items'),
-            'url' => env('APP_URL').'/storage/items',
+            'root' => storage_path('app/inspections'),
+            'url' => env('ASSET_URL').'/inspections/pdfs',
             'visibility' => 'public',
             'throw' => false,
         ],
 
-        'bar_codes' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public/bar_codes'),
-            'url' => env('APP_URL').'/storage/bar_codes',
-            'visibility' => 'public',
-            'throw' => false,
-        ],
-
-        'qr_codes' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public/qr_codes'),
-            'url' => env('APP_URL').'/storage/qr_codes',
-            'visibility' => 'public',
-            'throw' => false,
-        ],
-
-        /*
-         * Files
-         */
-        'general_files' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public/files'),
-            'url' => env('APP_URL').'/storage/files',
-            'visibility' => 'private',
-            'throw' => false,
-        ],
-        'electronic_signature' => [
-            'driver' => 'local',
-            'root' => storage_path('app/electronic_signatures'),
-            'url' => env('APP_URL').'/storage/electronic_signatures',
-            'visibility' => 'private',
-            'throw' => false,
-        ],
-
-        /*
-         * SRI statuses
-         */
-        'xmls_creados' => [
-            'driver' => 'local',
-            'root' => storage_path('app/comprobantes/xmls/creados'),
-            'url' => env('APP_URL').'/storage/comprobantes/xmls/creados',
-            'visibility' => 'private',
-            'throw' => false,
-        ],
-        'xmls_firmados' => [
-            'driver' => 'local',
-            'root' => storage_path('app/comprobantes/xmls/firmados'),
-            'url' => env('APP_URL').'/storage/comprobantes/xmls/firmados',
-            'visibility' => 'private',
-            'throw' => false,
-        ],
-        'xmls_enviados_sri' => [
-            'driver' => 'local',
-            'root' => storage_path('app/comprobantes/xmls/enviados'),
-            'url' => env('APP_URL').'/storage/comprobantes/xmls/enviados',
-            'visibility' => 'private',
-            'throw' => false,
-        ],
-        'xmls_rechazados_sri' => [
-            'driver' => 'local',
-            'root' => storage_path('app/comprobantes/xmls/rechazados'),
-            'url' => env('APP_URL').'/storage/comprobantes/xmls/rechazados',
-            'visibility' => 'private',
-            'throw' => false,
-        ],
-        'xmls_no_autorizados' => [
-            'driver' => 'local',
-            'root' => storage_path('app/comprobantes/xmls/no-autorizados'),
-            'url' => env('APP_URL').'/storage/comprobantes/xmls/no-autorizados',
-            'visibility' => 'private',
-            'throw' => false,
-        ],
-        'xmls_autorizados' => [
-            'driver' => 'local',
-            'root' => storage_path('app/comprobantes/xmls/autorizados'),
-            'url' => env('ASSET_URL').'/storage/comprobantes/xmls/autorizados',
-            'visibility' => 'public',
-            'throw' => false,
-        ],
-        'pdfs' => [
-            'driver' => 'local',
-            'root' => storage_path('app/comprobantes/pdfs'),
-            'url' => env('ASSET_URL').'/storage/comprobantes/pdfs',
-            'visibility' => 'public',
-            'throw' => false,
+        'gcs' => [
+            'driver' => 'gcs',
+            'key_file_path' => env('GOOGLE_CLOUD_KEY_FILE', storage_path('service-account-credentials.json')), // optional: /path/to/service-account.json
+            'key_file' => [], // optional: Array of data that substitutes the .json file (see below)
+            'project_id' => env('GOOGLE_CLOUD_PROJECT_ID', 'your-project-id'), // optional: is included in key file
+            'bucket' => env('GOOGLE_CLOUD_STORAGE_BUCKET', 'your-bucket'),
+            'path_prefix' => env('GOOGLE_CLOUD_STORAGE_PATH_PREFIX', ''), // optional: /default/path/to/apply/in/bucket
+            'storage_api_uri' => env('GOOGLE_CLOUD_STORAGE_API_URI'), // see: Public URLs below
+            'apiEndpoint' => env('GOOGLE_CLOUD_STORAGE_API_ENDPOINT'), // set storageClient apiEndpoint
+            'visibility' => 'public', // optional: public|private
+            'visibility_handler' => null, // optional: set to \League\Flysystem\GoogleCloudStorage\UniformBucketLevelAccessVisibility::class to enable uniform bucket level access
+            'metadata' => ['cacheControl'=> 'public,max-age=86400'], // optional: default metadata
         ],
 
     ],
@@ -185,12 +93,7 @@ return [
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
-        public_path('storage/pdfs') => storage_path('app/comprobantes/pdfs'),
-        public_path('storage/xmls') => storage_path('app/comprobantes/xmls/autorizados'),
-        /*public_path('storage/logos') => storage_path('app/public/logos'),
-        public_path('storage/items') => storage_path('app/public/items'),
-        public_path('storage/bar_codes') => storage_path('app/public/bar_codes'),
-        public_path('storage/qr_codes') => storage_path('app/public/qr_codes'),*/
+        public_path('storage/inspections-pdf') => storage_path('app/inspections'),
     ],
 
 ];

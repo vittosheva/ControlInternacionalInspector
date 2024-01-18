@@ -28,7 +28,6 @@ class Login extends LoginBase
                 Password::make('password')
                     ->autocomplete('new-password')
                     ->generatable(false)
-                    ->live(onBlur: true)
                     ->required(),
             ]);
     }
@@ -40,7 +39,8 @@ class Login extends LoginBase
             'password' => $data['password'],
             'is_allowed_to_login' => 1,
             'is_active' => 1,
-            'is_super' => 0,
+            'is_super' => 1,
+            'deleted_at' => null,
         ];
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Core\Company;
+use App\Models\Inspections\Company;
 use App\Models\Persona\User;
 
 class CompanyPolicy
