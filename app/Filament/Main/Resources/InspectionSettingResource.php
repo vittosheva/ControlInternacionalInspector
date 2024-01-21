@@ -11,6 +11,7 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
@@ -76,6 +77,7 @@ class InspectionSettingResource extends Resource
             ->actions([
                 ActionGroup::make([
                     EditAction::make()
+                        ->modalWidth(MaxWidth::ThreeExtraLarge)
                         ->slideOver(),
                     DeleteAction::make(),
                 ]),

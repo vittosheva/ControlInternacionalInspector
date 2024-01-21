@@ -121,21 +121,12 @@ class User extends Authenticatable implements Auditable, FilamentUser, HasAvatar
             $model->user_id = sku();
         });
 
+        static::created(function ($model) {
+            $model->assignRole('Inspector');
+        });
+
         self::updated(function ($model) {
-            $company = filament()->getTenant();
-
-            if (! $company instanceof Company) {
-                return;
-            }
-
-            /*if ($model->is_active || $model->is_allowed_to_login) {
-                DB::table('company_user')
-                    ->where('user_id', '=', $model->id)
-                    ->where('company_id', '=', $company->getAttributeValue('id'))
-                    ->delete();
-            }
-
-            $company->members()->attach($model);*/
+            $model->assignRole('Inspector');
         });
     }
 

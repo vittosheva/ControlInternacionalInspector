@@ -7,11 +7,12 @@ use App\Models\Inspections\ComplementaryService;
 use App\Models\Scopes\IsActiveScope;
 use App\Tables\Filters\IsActiveFilter;
 use Exception;
-use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
@@ -29,16 +30,16 @@ class ComplementaryServiceResource extends Resource
 
     protected static ?string $navigationIcon = 'lucide-list-checks';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                RichEditor::make('description')
+                Textarea::make('description')
                     ->label(__('Name'))
                     ->required()
-                    ->maxLength(65535)
+                    ->maxLength(255)
                     ->columnSpanFull(),
                 TextInput::make('code')
                     ->label(__('Code'))
@@ -87,6 +88,7 @@ class ComplementaryServiceResource extends Resource
             ->actions([
                 ActionGroup::make([
                     EditAction::make()
+                        ->modalWidth(MaxWidth::ExtraLarge)
                         ->slideOver(),
                     DeleteAction::make(),
                 ]),
@@ -96,7 +98,8 @@ class ComplementaryServiceResource extends Resource
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->reorderable('code');
+            ->reorderable('code', true)
+            ->defaultSort('code');
     }
 
     public static function getEloquentQuery(): Builder

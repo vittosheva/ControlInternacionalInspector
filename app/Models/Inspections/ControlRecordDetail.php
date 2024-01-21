@@ -4,9 +4,13 @@ namespace App\Models\Inspections;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use OwenIt\Auditing\Auditable as AuditableTrait;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class ControlRecordDetail extends Model
+class ControlRecordDetail extends Model implements Auditable
 {
+    use AuditableTrait;
+
     protected $connection = 'control_prod';
 
     protected $table = 'control_records_detail';
@@ -14,7 +18,7 @@ class ControlRecordDetail extends Model
     protected $fillable = [
         'control_record_id', 'hose_id', 'seal_found', 'seal_left', 'quantity', 'observations', 'company_observations',
         'measurement_id', 'measurement_id_sec_1', 'measurement_id_sec_2', 'observation_id', 'company_observation_id',
-        'letter_responsable_id', 'letter_observations', 'letter_seal', 'totalizator',
+        'letter_responsable_id', 'letter_observations', 'letter_seal', 'totalizator', 'octane',
     ];
 
     public function controlRecord(): BelongsTo

@@ -6,15 +6,17 @@ use App\Models\Inspections\ControlRecord;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
+#[Lazy]
 class HoseDetailsPanel extends Component
 {
     public ?array $data = [];
 
-    public ControlRecord $record;
+    public ?ControlRecord $record;
 
-    public function mount(ControlRecord $record): void
+    public function mount($record): void
     {
         $this->record = $record->load([
             'details' => [

@@ -22,10 +22,14 @@ use Filament\Notifications\Notification;
 use Filament\Support\Colors\Color;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
+#[Lazy]
 class HosesPanel extends Component implements HasForms
 {
     use InteractsWithForms;
@@ -56,7 +60,7 @@ class HosesPanel extends Component implements HasForms
         'clearHoses',
     ];
 
-    public function mount(ControlRecordDetail $controlRecordDetail, $operation, $companyId, $stationId): void
+    public function mount($operation, $companyId, $stationId, ControlRecordDetail $controlRecordDetail): void
     {
         $this->form->fill($controlRecordDetail->toArray());
 
@@ -120,7 +124,13 @@ class HosesPanel extends Component implements HasForms
                                     ->dehydrated(),
                                 TextInput::make('seal_left')
                                     ->label('Dejado')
-                                    ->required(),
+                                    ->required(function ($state, $operation) {
+                                        if (auth()->user()->isAdmin()) {
+                                            return false;
+                                        }
+
+                                        return $state == false || $operation === 'create';
+                                    }),
                             ])
                             ->columns(1),
                     ])
@@ -155,7 +165,13 @@ class HosesPanel extends Component implements HasForms
                                 return $component->state($state);
                             })
                             ->selectablePlaceholder(false)
-                            ->required()
+                            ->required(function () {
+                                if (auth()->user()->isAdmin()) {
+                                    return false;
+                                }
+
+                                return ! empty($this->selectedHose);
+                            })
                             ->columnSpan(6),
 
                         HrPlaceholder::make('')
@@ -165,27 +181,47 @@ class HosesPanel extends Component implements HasForms
                             ->label(__('Quantity'))
                             ->default(0)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Component $livewire, TextInput $component) => $livewire->validateOnly($component->getStatePath()))
+                            ->afterStateUpdated(function (Component $livewire, TextInput $component, Get $get, Set $set) {
+                                $livewire->validateOnly($component->getStatePath());
+
+                                if (empty($this->selectedHose) || $get('observation_id') == 4) {
+                                    $set('quantity', 0);
+                                }
+                            })
                             ->rules([
                                 'numeric',
                             ])
                             ->extraInputAttributes(['class' => 'text-right'])
-                            ->disabled(fn (Get $get) => empty($this->selectedHose) || $get('observation_id') == 4)
-                            ->dehydrated()
-                            ->required(fn (Get $get) => $get('observation_id') != 4)
+                            ->required(function () {
+                                if (auth()->user()->isAdmin()) {
+                                    return false;
+                                }
+
+                                return ! empty($this->selectedHose);
+                            })
                             ->columnSpan(3),
                         TextInput::make('octane')
                             ->label(__('Octane'))
                             ->default(0)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Component $livewire, TextInput $component) => $livewire->validateOnly($component->getStatePath()))
+                            ->afterStateUpdated(function (Component $livewire, TextInput $component, Get $get, Set $set) {
+                                $livewire->validateOnly($component->getStatePath());
+
+                                if (empty($this->selectedHose) || $get('observation_id') == 4) {
+                                    $set('octane', 0);
+                                }
+                            })
                             ->rules([
                                 'numeric',
                             ])
                             ->extraInputAttributes(['class' => 'text-right'])
-                            ->disabled(fn (Get $get) => empty($this->selectedHose) || $get('observation_id') == 4)
-                            ->dehydrated()
-                            ->required(fn (Get $get) => $get('observation_id') != 4)
+                            ->required(function () {
+                                if (auth()->user()->isAdmin()) {
+                                    return false;
+                                }
+
+                                return ! empty($this->selectedHose);
+                            })
                             ->columnSpan(3),
 
                         TextInput::make('totalizator')
@@ -227,7 +263,13 @@ class HosesPanel extends Component implements HasForms
                             })
                             ->default(0)
                             ->disableOptionWhen(fn () => empty($this->selectedHose))
-                            ->required()
+                            ->required(function ($state, $operation) {
+                                if (auth()->user()->isAdmin()) {
+                                    return false;
+                                }
+
+                                return $state == false || $operation === 'create';
+                            })
                             ->columnSpan(3),
 
                         HrPlaceholder::make('')
@@ -253,9 +295,14 @@ class HosesPanel extends Component implements HasForms
                                 return $component->state($state);
                             })
                             ->selectablePlaceholder(false)
-                            ->required()
-                            ->columnSpan(5),
+                            ->required(function () {
+                                if (auth()->user()->isAdmin()) {
+                                    return false;
+                                }
 
+                                return ! empty($this->selectedHose);
+                            })
+                            ->columnSpan(5),
                     ])
                     ->columns(12)
                     ->columnSpan(6),
@@ -277,56 +324,57 @@ class HosesPanel extends Component implements HasForms
         $hoseName = $this->hoses->firstWhere('id', '=', $this->selectedHose)->name ?? null;
         $selected = $this->dataCollection->first(fn ($value, $key) => $key === $hoseName);
 
-        if (empty($selected)) {
-            $control = ControlRecord::query()
-                ->with([
-                    'details' => [
-                        'hose',
-                        'measurement',
-                    ],
-                    'bathroomState',
-                ])
-                ->where('company_id', '=', $this->companyId)
-                ->where('station_id', '=', $this->stationId)
-                ->where('year', '=', now()->subYear()->format('Y'))
-                ->where('month', '=', now()->subMonth()->format('n'))
-                ->latest('inspection_date')
-                ->first();
+        if ($this->operation === 'create') {
+            if (! empty($selected)) {
+                $this->form->fill($selected);
 
-            if (empty($control) || empty($control->details) || empty($control->details->firstWhere('hose_id', '=', $id))) {
                 return;
             }
 
-            $selected = $control->details->firstWhere('hose_id', '=', $id);
+            $control = $this->getControlRecordFromDatabase();
+        } elseif ($this->operation === 'edit') {
+            if (! empty($selected)) {
+                $this->form->fill($selected);
 
-            $this->form->fill(
-                $selected->only([
-                    'control_record_id',
-                    'hose_id',
-                    'seal_found',
-                    'seal_left',
-                    'quantity',
-                    'observation_id',
-                    'observations',
-                    'company_observation_id',
-                    'company_observations',
-                    //'measurement_id',
-                    'measurement_id_sec_1',
-                    'measurement_id_sec_2',
-                    'totalizator',
-                ]) + [
-                    'hose' => $selected->hose->name,
-                    'fuel' => $selected->hose->type->name,
-                    'product' => $selected->hose->type->code,
-                    'color' => $this->hoses->firstWhere('id', '=', $this->selectedHose)->color,
-                    'measurement_id' => $selected->measurement->id ?? 0,
-                ]
-            );
+                return;
+            }
 
+            $control = $this->getControlRecordFromDatabase(false);
+        }
+
+        if (
+            empty($control)
+            || empty($control->details)
+            || empty($control->details->firstWhere('hose_id', '=', $id))
+        ) {
             return;
         }
 
-        $this->form->fill($selected);
+        $selected = $control->details->firstWhere('hose_id', '=', $id);
+
+        $this->form->fill(
+            $selected->only([
+                'control_record_id',
+                'hose_id',
+                'seal_found',
+                'seal_left',
+                'observation_id',
+                'observations',
+                'company_observation_id',
+                'company_observations',
+                'measurement_id_sec_1',
+                'measurement_id_sec_2',
+                'totalizator',
+            ]) + [
+                'hose' => $selected->hose->name,
+                'fuel' => $selected->hose->type->name,
+                'product' => $selected->hose->type->code,
+                'color' => $this->hoses->firstWhere('id', '=', $this->selectedHose)->color,
+                'quantity' => (empty($selected->quantity) && $this->operation === 'edit') ? $selected->quantity : 0,
+                'octane' => (empty($selected->octane) && $this->operation === 'edit') ? $selected->octane : 0,
+                'measurement_id' => $selected->measurement->id ?? 0,
+            ]
+        );
     }
 
     public function addControl(): void
@@ -348,19 +396,46 @@ class HosesPanel extends Component implements HasForms
         ]);
     }
 
-    public function clearHoses($stationId): void
+    public function clearHoses($data): void
     {
-        $this->hoses = $this->getHoses($stationId);
+        $this->hoses = collect();
         $this->dataCollection = collect();
+
+        if (empty($data['company_id']) || empty($data['station_id'])) {
+            return;
+        }
+
+        $this->stationId = $data['station_id'];
+        $this->companyId = $data['company_id'];
+
+        $this->hoses = $this->getHoses();
     }
 
-    protected function getHoses($stationId = null): \Illuminate\Database\Eloquent\Collection|array
+    protected function getHoses(): \Illuminate\Database\Eloquent\Collection|array
     {
         return Hose::query()
             ->with('type')
             ->where('company_id', '=', $this->companyId)
-            ->where('station_id', '=', $stationId ?? $this->stationId)
+            ->where('station_id', '=', $this->stationId)
             ->orderBy('name')
             ->get();
+    }
+
+    protected function getControlRecordFromDatabase(bool $subtract = true): Model|Builder|null
+    {
+        return ControlRecord::query()
+            ->with([
+                'details' => [
+                    'hose',
+                    'measurement',
+                ],
+                'bathroomState',
+            ])
+            ->where('company_id', '=', $this->companyId)
+            ->where('station_id', '=', $this->stationId)
+            ->where('year', '=', $subtract ? now()->subYear()->format('Y') : now()->format('Y'))
+            ->where('month', '=', $subtract ? now()->subMonth()->format('n') : now()->format('n'))
+            ->latest('inspection_date')
+            ->first();
     }
 }

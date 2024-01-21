@@ -5,15 +5,10 @@ namespace App\Http\Controllers\Pdf;
 use App\Http\Controllers\Controller;
 use App\Models\Inspections\ControlRecord;
 use App\Models\Inspections\InspectionSetting;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Jenssegers\Optimus\Optimus;
 use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\PdfBuilder;
 use Symfony\Component\HttpFoundation\Response;
 
 use function Spatie\LaravelPdf\Support\pdf;
@@ -56,6 +51,7 @@ class GenerateController extends Controller
         $data = [
             'record' => $this->document,
             'inspectionSettings' => InspectionSetting::query()->pluck('name', 'id')->all(),
+            'badHoses' => 0,
         ];
 
         if (request()->has('html')) {

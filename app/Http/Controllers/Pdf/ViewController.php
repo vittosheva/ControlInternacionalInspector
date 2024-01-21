@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Pdf;
 use App\Http\Controllers\Controller;
 use App\Models\Inspections\ControlRecord;
 use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Jenssegers\Optimus\Optimus;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ViewController extends Controller
 {
@@ -20,7 +20,7 @@ class ViewController extends Controller
     /**
      * @throws Exception
      */
-    public function handle($record)
+    public function handle($record): StreamedResponse
     {
         $document = ControlRecord::query()->find($this->optimus->decode($record), ['id', 'inspection_report_pdf']);
 

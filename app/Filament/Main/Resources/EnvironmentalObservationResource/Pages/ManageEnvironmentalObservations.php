@@ -5,6 +5,7 @@ namespace App\Filament\Main\Resources\EnvironmentalObservationResource\Pages;
 use App\Filament\Main\Resources\EnvironmentalObservationResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRecords;
+use Filament\Support\Enums\MaxWidth;
 
 class ManageEnvironmentalObservations extends ManageRecords
 {
@@ -14,6 +15,7 @@ class ManageEnvironmentalObservations extends ManageRecords
     {
         return [
             CreateAction::make()
+                ->modalWidth(MaxWidth::ExtraLarge)
                 ->slideOver(),
         ];
     }

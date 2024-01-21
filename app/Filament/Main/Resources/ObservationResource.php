@@ -2,11 +2,11 @@
 
 namespace App\Filament\Main\Resources;
 
-use App\Filament\Main\Resources\BathroomComplianceObservationResource\Pages\ManageBathroomComplianceObservations;
-use App\Models\Inspections\BathroomComplianceObservation;
+use App\Filament\Main\Resources\ObservationResource\Pages\ManageObservations;
+use App\Models\Inspections\Observation;
 use App\Models\Scopes\IsActiveScope;
-use App\Tables\Filters\IsActiveFilter;
 use Exception;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -18,33 +18,37 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class BathroomComplianceObservationResource extends Resource
+class ObservationResource extends Resource
 {
-    protected static ?string $model = BathroomComplianceObservation::class;
+    protected static ?string $model = Observation::class;
 
-    protected static ?string $navigationIcon = 'lucide-bath';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Textarea::make('description')
+                Textarea::make('name')
                     ->label(__('Name'))
                     ->required()
                     ->maxLength(255)
                     ->columnSpanFull(),
-                TextInput::make('code')
-                    ->label(__('Code'))
+                TextInput::make('priority')
+                    ->label(__('Priority'))
                     ->required()
                     ->columnSpan(3),
+                ColorPicker::make('color')
+                    ->required()
+                    ->columnSpan(5),
                 Toggle::make('active')
                     ->label(__('Active'))
                     ->inline(false)
@@ -61,15 +65,18 @@ class BathroomComplianceObservationResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('code')
-                    ->label(__('Code'))
-                    ->alignCenter()
-                    ->sortable(),
-                TextColumn::make('description')
+                TextColumn::make('name')
                     ->label(__('Name'))
                     ->html()
                     ->wrap()
                     ->searchable(),
+                TextColumn::make('priority')
+                    ->label(__('Priority'))
+                    ->alignCenter()
+                    ->sortable(),
+                ColorColumn::make('color')
+                    ->label(__('Color'))
+                    ->alignCenter(),
                 IconColumn::make('active')
                     ->label(__('Active'))
                     ->boolean(),
@@ -98,8 +105,8 @@ class BathroomComplianceObservationResource extends Resource
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->reorderable('code', true)
-            ->defaultSort('code');
+            ->reorderable('priority', true)
+            ->defaultSort('priority');
     }
 
     public static function getEloquentQuery(): Builder
@@ -111,18 +118,18 @@ class BathroomComplianceObservationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ManageBathroomComplianceObservations::route('/'),
+            'index' => ManageObservations::route('/'),
         ];
     }
 
     public static function getModelLabel(): string
     {
-        return __('Bathroom Compliance Observation');
+        return __('Observation');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Bathroom Compliance Observations');
+        return __('Observations');
     }
 
     public static function getNavigationGroup(): ?string

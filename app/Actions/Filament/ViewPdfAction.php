@@ -5,7 +5,6 @@ namespace App\Actions\Filament;
 use Filament\Actions\Action;
 use Filament\Support\Colors\Color;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 use Jenssegers\Optimus\Optimus;
 
 class ViewPdfAction extends Action

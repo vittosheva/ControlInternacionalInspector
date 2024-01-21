@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Filament\Main\Resources\BathroomComplianceObservationResource\Pages;
+namespace App\Filament\Main\Resources\ObservationResource\Pages;
 
-use App\Filament\Main\Resources\BathroomComplianceObservationResource;
+use App\Filament\Main\Resources\ObservationResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRecords;
 use Filament\Support\Enums\MaxWidth;
 
-class ManageBathroomComplianceObservations extends ManageRecords
+class ManageObservations extends ManageRecords
 {
-    protected static string $resource = BathroomComplianceObservationResource::class;
+    protected static string $resource = ObservationResource::class;
 
     protected function getHeaderActions(): array
     {

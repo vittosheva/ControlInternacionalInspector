@@ -9,13 +9,15 @@ use App\Filament\Main\Resources\InspectionResource\Pages\EditInspection;
 use App\Filament\Main\Resources\InspectionResource\Pages\ListInspections;
 use App\Filament\Main\Resources\InspectionResource\Pages\ViewInspection;
 use App\Models\Inspections\ControlRecord;
+use App\Models\Persona\User;
 use App\Tables\Columns\CreatedAtColumn;
 use App\Tables\Filters\DateRangeFilter;
-use App\Traits\InspectionTrait;
+use App\Traits\InspectionFormTrait;
 use Exception;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Wizard;
@@ -23,12 +25,11 @@ use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Colors\Color;
 use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -42,7 +43,7 @@ use Jenssegers\Date\Date;
 
 class InspectionResource extends Resource
 {
-    use InspectionTrait;
+    use InspectionFormTrait;
 
     protected static ?string $model = ControlRecord::class;
 
@@ -60,11 +61,11 @@ class InspectionResource extends Resource
                         ->description('Datos principales')
                         ->schema([
                             Section::make()
-                                ->schema(static::getheaderStatistics())
+                                ->schema(static::getHeaderStatistics())
                                 ->hiddenOn('create')
                                 ->columns(6),
                             Section::make()
-                                ->schema(static::getHeaderdata())
+                                ->schema(static::getHeaderData())
                                 ->columns(12),
                         ])
                         ->columnSpanFull(),
@@ -73,17 +74,34 @@ class InspectionResource extends Resource
                         ->description('Pantalla para las inspecciones')
                         ->schema([
                             Grid::make()
-                                ->schema(fn (Get $get, string $operation) => static::getInspections($get, $operation))
+                                ->schema(fn ($record, $operation, Get $get) => static::getInspections($record, $get, $operation))
                                 ->columns(1),
                         ])
+                        ->beforeValidation(function (Get $get) {
+                            if (auth()->user()->isAdmin()) {
+                                return true;
+                            }
+
+                            if (! empty($get('hose_inspections_completed')) || $get('hose_inspections_completed')) {
+                                return true;
+                            }
+
+                            Notification::make()
+                                ->title('No ha realizado las inspecciones necesarias')
+                                ->danger()
+                                ->color(Color::Red)
+                                ->send();
+
+                            return false;
+                        })
                         ->columnSpanFull(),
                     Step::make(__('Observations'))
                         ->key('observations')
                         ->description('Pantalla para observaciones complementarias')
                         ->schema([
                             Grid::make()
-                                ->schema(fn (string $operation) => static::getAdditionalInspections($operation))
-                                ->columns(1),
+                                ->schema(fn () => static::getAdditionalInspections())
+                                ->columns(12),
                         ])
                         ->columnSpanFull(),
                     Step::make(__('Summary'))
@@ -91,7 +109,7 @@ class InspectionResource extends Resource
                         ->description('Resumen de la inspección')
                         ->schema([
                             Grid::make()
-                                ->schema(fn (string $operation) => static::getFinalDetails($operation))
+                                ->schema(fn () => static::getFinalDetails())
                                 ->columns(12),
                         ])
                         ->columnSpanFull(),
@@ -141,11 +159,11 @@ class InspectionResource extends Resource
                     ->toggleable(false),
             ])
             ->recordUrl(function (Model $record) {
-                if (! auth()->user()->isAdmin()) {
-                    return ViewInspection::getUrl([$record->getAttributeValue('id')]);
+                if (auth()->user()->isAdmin() || $record->admin_authorization) {
+                    return EditInspection::getUrl([$record->getAttributeValue('id')]);
                 }
 
-                return EditInspection::getUrl([$record->getAttributeValue('id')]);
+                return ViewInspection::getUrl([$record->getAttributeValue('id')]);
             })
             ->filters([
                 SelectFilter::make('companies')
@@ -165,12 +183,15 @@ class InspectionResource extends Resource
                                 Select::make('station_id')
                                     ->label(__('Gas Station'))
                                     ->relationship('station', 'name', function (Builder $query, Get $get) {
-                                        return $query
-                                            ->where('company_id', '=', blank($get('company_id')) ? 0 : $get('company_id'))
-                                            ->oldest('name');
+                                        $query = $query->oldest('name');
+
+                                        if (empty($get('company_id'))) {
+                                            return $query;
+                                        }
+
+                                        return $query->where('company_id', '=', $get('company_id'));
                                     })
                                     ->preload()
-                                    //->multiple()
                                     ->native(false)
                                     ->columnSpan(7),
                             ])
@@ -250,25 +271,69 @@ class InspectionResource extends Resource
             ->actions([
                 ActionGroup::make([
                     ActionGroup::make([
-                        EditAction::make()->visible(auth()->user()->isAdmin()),
+                        EditAction::make()
+                            ->authorize(fn ($record) => $record->admin_authorization)
+                            ->visible(fn ($record) => $record->admin_authorization || auth()->user()->isAdmin()),
                         ViewAction::make(),
+                    ])
+                        ->dropdown(false),
+                    ActionGroup::make([
+                        \Filament\Tables\Actions\Action::make(__('Autorizar reingreso'))
+                            ->icon('lucide-fingerprint')
+                            ->form([
+                                Fieldset::make(__('Reingreso'))
+                                    ->schema([
+                                        Select::make('created_by')
+                                            ->label(__('Autorizar a'))
+                                            ->options(User::query()
+                                                ->role('Inspector')
+                                                ->orderBy('name')
+                                                ->pluck('name', 'id')
+                                                ->toArray())
+                                            ->default(fn ($record) => $record->created_by),
+                                        Radio::make('admin_authorization')
+                                            ->label('Autorización')
+                                            ->options([
+                                                1 => __('Yes'),
+                                                0 => __('No'),
+                                            ])
+                                            ->inline()
+                                            ->required(),
+                                    ])
+                                    ->columns(1),
+                            ])
+                            ->action(function ($record, $data) {
+                                $record->created_by = $data['created_by'];
+                                $record->admin_authorization = $data['admin_authorization'];
+                                $record->save();
+
+                                Notification::make()
+                                    ->title('Registro actualizado')
+                                    ->success()
+                                    ->color(Color::Emerald)
+                                    ->send();
+                            })
+                            ->requiresConfirmation()
+                            ->visible(auth()->user()->isAdmin()),
                     ])
                         ->dropdown(false),
                     ActionGroup::make([
                         GeneratePdfAction::make(),
                         ViewPdfAction::make(),
                     ])
-                        ->dropdown(false),
-                    DeleteAction::make(),
+                        ->dropdown(false)
+                        ->visible(auth()->user()->isAdmin()),
+                    DeleteAction::make()
+                        ->visible(auth()->user()->isAdmin()),
                 ]),
             ])
-            ->bulkActions([
+            /*->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->requiresConfirmation()
                         ->visible(auth()->user()->isAdmin()),
                 ]),
-            ])
+            ])*/
             ->groups([
                 Group::make('inspection_date')
                     ->label(__('Inspection Date'))
@@ -287,7 +352,9 @@ class InspectionResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->when(! auth()->user()->isAdmin(), fn (Builder $query) => $query->where('created_by', '=', auth()->id()));
+            ->when(! auth()->user()->isAdmin(), fn (Builder $query) => $query
+                ->where('created_by', '=', auth()->id())
+            );
     }
 
     public static function getRelations(): array

@@ -3,11 +3,10 @@
         <div class="grid gap-8 gap-y-2 text-sm grid-cols-1 lg:grid-cols-10">
             <div class="col-span-full">
                 <x-filament::fieldset>
-                    <x-slot name="label">Detalle de inspecciones:</x-slot>
+                    <x-slot name="label">Detalle de inspecciones realizadas:</x-slot>
 
                     <div class="mx-auto px-4">
-                        <!-- Start coding here -->
-                        <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden">
+                        <div class="bg-white dark:bg-gray-800 relative sm:rounded-lg overflow-hidden">
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm text-left text-gray-700 dark:text-gray-400">
                                     <thead class="text-xs text-gray-700 uppercase bg-gray-50">
@@ -26,13 +25,13 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($record->details as $item)
+                                        @forelse ($record->details as $item)
                                         <tr class="border-b dark:border-gray-700">
                                             <td class="px-4 py-3">{{ $loop->iteration }}</td>
                                             <td class="px-4 py-3">{{ $item->hose->name }}</td>
                                             <td class="px-4 py-3 text-center">{{ $item->seal_found }}</td>
                                             <td class="px-4 py-3 text-center">{{ $item->seal_left }}</td>
-                                            <td class="px-4 py-3 text-right">{{ $item->quantity }}</td>
+                                            <td class="px-4 py-3 text-right">{{ $item->quantity ?? '-' }}</td>
                                             <td class="px-4 py-3 text-right">{{ $item->octane ?? '-' }}</td>
                                             <td class="px-4 py-3">{{ $item->observation->name ?? '-' }}</td>
                                             <td class="px-4 py-3 text-right">{{ $item->totalizator ?? '-' }}</td>
@@ -40,7 +39,11 @@
                                             <td class="px-4 py-3 text-center">{{ $item->measurement2->name ?? '-' }}</td>
                                             <td class="px-4 py-3">{{ $item->observationCompany->name ?? '-' }}</td>
                                         </tr>
-                                        @endforeach
+                                        @empty
+                                            <tr class="border-b dark:border-gray-700">
+                                                <td class="px-4 py-3 text-center" colspan="11">No existen registros de inspección</td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>

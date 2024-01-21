@@ -2,12 +2,11 @@
 
 namespace App\Filament\Main\Resources;
 
-use App\Filament\Main\Resources\BathroomComplianceObservationResource\Pages\ManageBathroomComplianceObservations;
-use App\Models\Inspections\BathroomComplianceObservation;
+use App\Filament\Main\Resources\InspectorResource\Pages\ManageInspectors;
+use App\Models\Persona\User;
 use App\Models\Scopes\IsActiveScope;
-use App\Tables\Filters\IsActiveFilter;
 use Exception;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
@@ -24,11 +23,11 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class BathroomComplianceObservationResource extends Resource
+class InspectorResource extends Resource
 {
-    protected static ?string $model = BathroomComplianceObservation::class;
+    protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'lucide-bath';
+    protected static ?string $navigationIcon = 'heroicon-o-user';
 
     protected static ?int $navigationSort = 3;
 
@@ -36,16 +35,41 @@ class BathroomComplianceObservationResource extends Resource
     {
         return $form
             ->schema([
-                Textarea::make('description')
+                TextInput::make('name')
                     ->label(__('Name'))
                     ->required()
                     ->maxLength(255)
                     ->columnSpanFull(),
-                TextInput::make('code')
-                    ->label(__('Code'))
+                TextInput::make('email')
+                    ->label(__('Email'))
                     ->required()
+                    ->columnSpanFull(),
+                TextInput::make('password')
+                    ->label(__('Password'))
+                    ->password()
+                    ->revealable()
+                    ->dehydrated(function ($operation, $state): bool {
+                        if (! empty($state)) {
+                            return true;
+                        }
+
+                        if ($operation === 'create') {
+                            return true;
+                        }
+
+                        return false;
+                    })
+                    ->required(fn ($operation): bool => $operation === 'create')
+                    ->columnSpanFull(),
+                Hidden::make('email_verified_at')
+                    ->default(now())
+                    ->dehydrated(fn ($operation): bool => $operation === 'create'),
+                Toggle::make('is_allowed_to_login')
+                    ->label(__('Is Allowed To Login?'))
+                    ->inline(false)
+                    ->default(true)
                     ->columnSpan(3),
-                Toggle::make('active')
+                Toggle::make('is_active')
                     ->label(__('Active'))
                     ->inline(false)
                     ->default(true)
@@ -61,18 +85,24 @@ class BathroomComplianceObservationResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('code')
-                    ->label(__('Code'))
-                    ->alignCenter()
-                    ->sortable(),
-                TextColumn::make('description')
+                TextColumn::make('name')
                     ->label(__('Name'))
-                    ->html()
-                    ->wrap()
                     ->searchable(),
-                IconColumn::make('active')
+                TextColumn::make('email')
+                    ->label(__('Email'))
+                    ->copyable()
+                    ->searchable(),
+                IconColumn::make('is_allowed_to_login')
+                    ->label(__('Is Allowed To Login?'))
+                    ->boolean()
+                    ->alignCenter(),
+                IconColumn::make('is_active')
                     ->label(__('Active'))
-                    ->boolean(),
+                    ->boolean()
+                    ->alignCenter(),
+                TextColumn::make('created_at')
+                    ->label(__('Created At'))
+                    ->alignCenter(),
             ])
             ->filters([
                 /*IsActiveFilter::make('active')
@@ -98,35 +128,36 @@ class BathroomComplianceObservationResource extends Resource
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->reorderable('code', true)
-            ->defaultSort('code');
+            ->defaultSort('created_at');
     }
 
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->withoutGlobalScope(new IsActiveScope());
+            ->withoutGlobalScope(new IsActiveScope())
+            ->where('is_super', '=', 0)
+            ->role('Inspector');
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => ManageBathroomComplianceObservations::route('/'),
+            'index' => ManageInspectors::route('/'),
         ];
     }
 
     public static function getModelLabel(): string
     {
-        return __('Bathroom Compliance Observation');
+        return __('Inspector');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Bathroom Compliance Observations');
+        return __('Inspectors');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Observation & Services');
+        return __('Controls');
     }
 }

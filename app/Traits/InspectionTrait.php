@@ -2,233 +2,174 @@
 
 namespace App\Traits;
 
-use App\Livewire\ComplementaryServicesPanel;
-use App\Livewire\HoseDetailsPanel;
-use App\Livewire\HosesPanel;
-use App\Models\Inspections\Company;
 use App\Models\Inspections\ControlRecord;
-use App\Models\Inspections\Station;
-use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Livewire;
-use Filament\Forms\Components\MarkdownEditor;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\View;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
-use Illuminate\Database\Eloquent\Builder;
-use Livewire\Component;
+use App\Models\Inspections\ControlRecordBathroom;
+use App\Models\Inspections\ControlRecordDetail;
+use App\Models\Inspections\ControlRecordEnvironmental;
+use App\Models\Inspections\ControlRecordService;
+use Filament\Notifications\Notification;
+use Filament\Support\Colors\Color;
+use Filament\Support\Exceptions\Halt;
+use Illuminate\Support\Facades\DB;
 
 trait InspectionTrait
 {
-    protected static function getHeaderStatistics(): array
-    {
-        return [
-            Placeholder::make('created_at')
-                ->label(__('Created At'))
-                ->content(fn ($record): ?string => $record->created_at ?? '-'),
+    public array $dataHoses = [];
 
-            Placeholder::make('updated_at')
-                ->label(__('Updated At 2'))
-                ->content(fn ($record): ?string => $record->updated_at ?? '-'),
-        ];
+    public array $dataComplementaryServices = [];
+
+    public function hosesUpdated($data): void
+    {
+        $this->dataHoses = $data;
+
+        if ($this->dataHoses['total'] == count($this->dataHoses['inspections_done'])) {
+            $this->data['hose_inspections_completed'] = true;
+        }
     }
 
-    protected static function getHeaderData(): array
+    public function complementaryServicesUpdated($data): void
     {
-        return [
-            TextInput::make('inspection_date')
-                ->label(__('Inspection Date'))
-                ->default(now()->format('d-m-Y'))
-                ->extraInputAttributes(['class' => 'text-center'])
-                ->disabled()
-                ->required()
-                ->columnSpan(2),
-
-            Select::make('company_id')
-                ->label(__('Trading Company'))
-                ->relationship('company', 'name')
-                ->afterStateUpdated(function (Set $set, $state) {
-                    $company = Company::query()->find($state, [
-                        'price_extra',
-                        'price_super',
-                        'price_diesel_1',
-                        'price_diesel_2',
-                        'price_eco_plus',
-                    ]);
-
-                    $set('station_id', null);
-
-                    $set('price_extra', $company->price_extra ?? null);
-                    $set('price_super', $company->price_super ?? null);
-                    $set('price_diesel_1', $company->price_diesel_2 ?? null);
-                    $set('price_eco_plus', $company->price_eco_plus ?? null);
-                })
-                ->searchable()
-                ->selectablePlaceholder(false)
-                ->required()
-                ->columnSpan(3),
-
-            Select::make('station_id')
-                ->label(__('Gas Station'))
-                ->relationship('station', 'name', function (Builder $query, Get $get, $operation) {
-                    if ($operation === 'view') {
-                        return $query;
-                    }
-
-                    if (empty($get('company_id'))) {
-                        return $query->whereNull('id');
-                    }
-
-                    $stationsWithInspectionsInThisYearAndMonth = ControlRecord::query()
-                        ->where('year', '=', date('Y'))
-                        ->where('month', '=', date('n'))
-                        ->where('company_id', '=', $get('company_id'))
-                        ->pluck('station_id')
-                        ->toArray();
-
-                    return $query
-                        ->where('company_id', '=', $get('company_id'))
-                        ->whereNotIn('id', $stationsWithInspectionsInThisYearAndMonth);
-                })
-                ->disableOptionWhen(fn (Get $get) => blank($get('company_id')))
-                ->live()
-                ->afterStateUpdated(function (Get $get, Set $set, $state, Component $livewire) {
-                    $street = Station::query()
-                        ->find($state, ['id', 'street'])
-                        ->getAttributeValue('street');
-
-                    $set('address', ! empty($street) ? $street : 'Sin dirección');
-
-                    $livewire->dispatch('clearHoses', ['stationId' => $get('station_id')]);
-                })
-                ->preload()
-                ->searchable()
-                ->selectablePlaceholder(false)
-                ->required()
-                ->columnSpan(3),
-
-            TextInput::make('address')
-                ->label(__('Address'))
-                ->afterStateHydrated(function (Get $get, Set $set) {
-                    if (! empty($get('station_id'))) {
-                        $street = Station::query()
-                            ->find($get('station_id'), ['id', 'street'])
-                            ->getAttributeValue('street');
-
-                        return $set('address', ! empty($street) ? $street : 'Sin dirección');
-                    }
-
-                    return null;
-                })
-                ->disabled()
-                ->dehydrated(false)
-                ->columnSpan(4),
-
-            Fieldset::make('PRECIOS')
-                ->schema([
-                    TextInput::make('price_extra')
-                        ->label(__('Extra'))
-                        ->numeric()
-                        ->live(onBlur: true)
-                        ->afterStateUpdated(fn (Component $livewire, TextInput $component) => $livewire->validateOnly($component->getStatePath()))
-                        ->placeholder(__('USD$'))
-                        ->required(),
-                    TextInput::make('price_super')
-                        ->label(__('Super'))
-                        ->numeric()
-                        ->live(onBlur: true)
-                        ->afterStateUpdated(fn (Component $livewire, TextInput $component) => $livewire->validateOnly($component->getStatePath()))
-                        ->placeholder(__('USD$'))
-                        ->required(),
-                    TextInput::make('price_diesel_2')
-                        ->label(__('Diesel Premium'))
-                        ->numeric()
-                        ->live(onBlur: true)
-                        ->afterStateUpdated(fn (Component $livewire, TextInput $component) => $livewire->validateOnly($component->getStatePath()))
-                        ->placeholder(__('USD$'))
-                        ->required(),
-                    TextInput::make('price_eco_plus')
-                        ->label(__('Eco País'))
-                        ->numeric()
-                        ->live(onBlur: true)
-                        ->afterStateUpdated(fn (Component $livewire, TextInput $component) => $livewire->validateOnly($component->getStatePath()))
-                        ->placeholder(__('USD$'))
-                        ->required(),
-                ])
-                ->columns(4)
-                ->columnSpan(12),
-        ];
+        $this->dataComplementaryServices = $data;
     }
 
-    protected static function getInspections($get, $operation): array
+    /**
+     * @throws Halt
+     */
+    public function afterValidate(): void
     {
-        return [
-            Livewire::make(HosesPanel::class, [
-                'operation' => $operation,
-                'companyId' => $get('company_id'),
-                'stationId' => $get('station_id'),
-            ])
-                ->visible(function (Get $get) use ($operation) {
-                    if ($operation === 'view') {
-                        return false;
-                    }
+        if (auth()->user()->isAdmin()) {
+            return;
+        }
 
-                    return $get('company_id') &&
-                        $get('station_id') &&
-                        $get('price_extra') &&
-                        $get('price_super') &&
-                        $get('price_diesel_1') &&
-                        $get('price_eco_plus');
-                }),
-            Livewire::make(HoseDetailsPanel::class, fn ($record) => [
-                'record' => $record,
-            ])
-                ->visible(fn () => $operation === 'view'),
-        ];
+        if ($this->data['do_not_update']) {
+            return;
+        }
+
+        if (
+            empty($this->dataHoses)
+            || empty($this->dataHoses['total'])
+            || empty($this->dataHoses['inspections_done'])
+        ) {
+            Notification::make()
+                ->title('No se han realizado inspecciones.')
+                ->color(Color::Amber)
+                ->warning()
+                ->send();
+            $this->halt();
+        }
+
+        if ($this->dataHoses['total'] != count($this->dataHoses['inspections_done'])) {
+            Notification::make()
+                ->title('Faltan inspecciones')
+                ->body('Actualmente tiene '.count($this->dataHoses['inspections_done']).'/'.$this->dataHoses['total'])
+                ->color(Color::Amber)
+                ->warning()
+                ->send();
+            $this->halt();
+        }
     }
 
-    protected static function getAdditionalInspections($operation): array
+    protected function saveInDatabase(): void
     {
-        return [
-            View::make('livewire.livewire-render')
-                ->viewData([
-                    'livewire' => ComplementaryServicesPanel::class,
-                    'params' => [
-                        'controlRecord' => new ControlRecord(),
-                        'operation' => $operation,
-                    ],
-                ]),
-        ];
-    }
+        $savedRecord = $this->getRecord();
 
-    protected static function getFinalDetails(): array
-    {
-        return [
-            Fieldset::make('')
-                ->schema([
-                    TextInput::make('serafin_code')
-                        ->label(__('Código SERAFÍN'))
-                        ->live(onBlur: true)
-                        ->afterStateUpdated(fn (Component $livewire, TextInput $component) => $livewire->validateOnly($component->getStatePath()))
-                        ->extraInputAttributes(['class' => 'text-center'])
-                        ->required(),
-                ])
-                ->columns(1)
-                ->columnSpan(2),
-            Fieldset::make('')
-                ->schema([
-                    Toggle::make('allowed_to_place_calibration_seals')
-                        ->label(__('Se permitió colocar sellos de calibración?'))
-                        ->inline(false),
-                ])
-                ->columns(1)
-                ->columnSpan(3),
-            MarkdownEditor::make('inspector_notes')
-                ->label(__('Additional Observations'))
-                ->columnSpan('full'),
-        ];
+        if (! $savedRecord instanceof ControlRecord) {
+            return;
+        }
+
+        DB::transaction(function () use ($savedRecord) {
+            // 1. Control Details
+            if (! empty($this->dataHoses['inspections_done'])) {
+                $controlRecordDetails = collect($this->dataHoses['inspections_done'])
+                    ->map(function ($item) use ($savedRecord) {
+                        unset(
+                            $item['hose'],
+                            $item['fuel'],
+                            $item['product'],
+                            $item['color'],
+                        );
+
+                        $item['control_record_id'] = $savedRecord->id ?? null;
+
+                        return (new ControlRecordDetail())->fill($item);
+                    })
+                    ->values();
+
+                if ($controlRecordDetails->isNotEmpty()) {
+                    $savedRecord->controlDetails()->delete();
+                    $savedRecord->controlDetails()->saveMany($controlRecordDetails->all());
+                }
+            }
+
+            // 2. Control Complementary Services
+            if (! empty($this->dataComplementaryServices['complementary_services'])) {
+                $controlRecordServices = collect($this->dataComplementaryServices['complementary_services'])
+                    ->map(function ($item) use ($savedRecord) {
+                        return (new ControlRecordService())->fill([
+                            'control_records_id' => $savedRecord->id,
+                            'complementary_services_id' => $item,
+                            'complete' => 1,
+                        ]);
+                    })
+                    ->values();
+
+                if ($controlRecordServices->isNotEmpty()) {
+                    $savedRecord->complementaryServices()->delete();
+                    $savedRecord->complementaryServices()->saveMany($controlRecordServices->all());
+                }
+            }
+
+            // 3. Control Environmental Observations
+            if (! empty($this->dataComplementaryServices['environmental_observations'])) {
+                $controlRecordEnvironmentals = collect($this->dataComplementaryServices['environmental_observations'])
+                    ->map(function ($item) use ($savedRecord) {
+                        return (new ControlRecordEnvironmental())->fill([
+                            'control_records_id' => $savedRecord->id,
+                            'environmental_observations_id' => $item,
+                            'complete' => 1,
+                        ]);
+                    })
+                    ->values();
+
+                if ($controlRecordEnvironmentals->isNotEmpty()) {
+                    $savedRecord->environmentalObservations()->delete();
+                    $savedRecord->environmentalObservations()->saveMany($controlRecordEnvironmentals->all());
+                }
+            }
+
+            // 4. Control Bathroom Compliance Observations
+            if (! empty($this->dataComplementaryServices['bathroom_compliance_observations'])) {
+                $controlRecordBathrooms = collect($this->dataComplementaryServices['bathroom_compliance_observations'])
+                    ->map(function ($items, $key) use ($savedRecord) {
+                        $bathroomComplianceObservations = [];
+
+                        if (! empty($items) && is_array($items)) {
+                            foreach ($items as $sex => $item) {
+                                $bathroomComplianceObservations['control_records_id'] = $savedRecord->id;
+                                $bathroomComplianceObservations['bathroom_compliance_observations_id'] = $key;
+
+                                if ($sex == 0) {
+                                    $bathroomComplianceObservations['men'] = $item;
+                                } elseif ($sex == 1) {
+                                    $bathroomComplianceObservations['women'] = $item;
+                                } elseif ($sex == 2) {
+                                    $bathroomComplianceObservations['disability_person'] = $item;
+                                }
+                            }
+                        }
+
+                        return (new ControlRecordBathroom())->fill($bathroomComplianceObservations);
+                    })
+                    ->values();
+
+                if ($controlRecordBathrooms->isNotEmpty()) {
+                    $savedRecord->bathroomComplianceObservations()->delete();
+                    $savedRecord->bathroomComplianceObservations()->saveMany($controlRecordBathrooms);
+                }
+            }
+
+            $savedRecord->admin_authorization = 0;
+            $savedRecord->save();
+        });
     }
 }

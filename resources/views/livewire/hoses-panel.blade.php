@@ -2,13 +2,13 @@
     <div x-data="">
         <div class="grid gap-8 gap-y-2 text-sm grid-cols-1 lg:grid-cols-10">
             <div class="lg:col-span-2 text-gray-600 space-y-4">
-                <x-filament::fieldset>
-                    <x-slot name="label">Mangueras disponibles: {{ $hoses->count() }}</x-slot>
+                <x-filament::fieldset class="bg-slate-100">
+                    <x-slot name="label">Mangueras disponibles:</x-slot>
+                    @if (! empty($dataCollection))
+                        <p class="mb-4">Mangueras inspeccionadas: {{ $dataCollection->count() }}/{{ $hoses->count() }}</p>
+                    @endif
                     <div class="h-[22rem] overflow-y-scroll">
                         <div class="p-1 pr-3">
-                            @if (! empty($dataCollection))
-                            <p class="mb-4">Mangueras inspeccionadas: {{ $dataCollection->count() }}</p>
-                            @endif
                             <ul class="fi-sidebar-group-items flex flex-col gap-y-2">
                                 @if (! empty($hoses))
                                     @foreach ($hoses->sortBy('name') as $hose)

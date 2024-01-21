@@ -5,9 +5,13 @@ namespace App\Models\Inspections;
 use App\Models\Scopes\IsActiveScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use OwenIt\Auditing\Auditable as AuditableTrait;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class ComplementaryService extends Model
+class ComplementaryService extends Model implements Auditable
 {
+    use AuditableTrait;
+
     protected $connection = 'control_prod';
 
     protected $table = 'complementary_services';
