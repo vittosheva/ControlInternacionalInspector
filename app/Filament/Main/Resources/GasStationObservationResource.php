@@ -2,49 +2,57 @@
 
 namespace App\Filament\Main\Resources;
 
-use App\Filament\Main\Resources\ComplementaryServiceResource\Pages\ManageComplementaryServices;
-use App\Models\Inspections\ComplementaryService;
+use App\Filament\Main\Resources\GasStationObservationResource\Pages\ManageGasStationObservations;
+use App\Models\Inspections\GasStationObservation;
 use App\Models\Scopes\IsActiveScope;
-use App\Tables\Filters\IsActiveFilter;
 use Exception;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
-class ComplementaryServiceResource extends Resource
+class GasStationObservationResource extends Resource
 {
-    protected static ?string $model = ComplementaryService::class;
+    protected static ?string $model = GasStationObservation::class;
 
-    protected static ?string $navigationIcon = 'lucide-list-checks';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Textarea::make('description')
+                Textarea::make('name')
                     ->label(__('Name'))
                     ->required()
                     ->maxLength(255)
                     ->columnSpanFull(),
-                TextInput::make('code')
-                    ->label(__('Code'))
+                TextInput::make('priority')
+                    ->label(__('Priority'))
                     ->required()
                     ->columnSpan(3),
+                ColorPicker::make('color')
+                    ->required()
+                    ->columnSpan(5),
                 Toggle::make('active')
                     ->label(__('Active'))
                     ->inline(false)
@@ -61,15 +69,18 @@ class ComplementaryServiceResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('code')
-                    ->label(__('Code'))
-                    ->alignCenter()
-                    ->sortable(),
-                TextColumn::make('description')
+                TextColumn::make('name')
                     ->label(__('Name'))
                     ->html()
                     ->wrap()
                     ->searchable(),
+                TextColumn::make('priority')
+                    ->label(__('Priority'))
+                    ->alignCenter()
+                    ->sortable(),
+                ColorColumn::make('color')
+                    ->label(__('Color'))
+                    ->alignCenter(),
                 IconColumn::make('active')
                     ->label(__('Active'))
                     ->boolean(),
@@ -90,16 +101,35 @@ class ComplementaryServiceResource extends Resource
                     EditAction::make()
                         ->modalWidth(MaxWidth::ExtraLarge)
                         ->slideOver(),
-                    DeleteAction::make(),
+                    //DeleteAction::make(),
+                    Action::make('active')
+                        ->label('Activar/Desactivar')
+                        ->icon('heroicon-m-check-circle')
+                        ->requiresConfirmation()
+                        ->action(function (Model $record) {
+                            $record->active = ! $record->active;
+                            $record->save();
+                        }),
                 ]),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    //DeleteBulkAction::make(),
+                    BulkAction::make('active')
+                        ->label('Activar/Desactivar')
+                        ->icon('heroicon-m-check-circle')
+                        ->requiresConfirmation()
+                        ->action(function (Collection $records) {
+                            $records->each(function ($record) {
+                                $record->active = ! $record->active;
+                                $record->save();
+                            });
+                        })
+                        ->deselectRecordsAfterCompletion(),
                 ]),
             ])
-            ->reorderable('code', true)
-            ->defaultSort('code');
+            ->reorderable('priority', true)
+            ->defaultSort('priority');
     }
 
     public static function getEloquentQuery(): Builder
@@ -111,18 +141,18 @@ class ComplementaryServiceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ManageComplementaryServices::route('/'),
+            'index' => ManageGasStationObservations::route('/'),
         ];
     }
 
     public static function getModelLabel(): string
     {
-        return __('Complementary Service');
+        return __('Gas Station Observation');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Complementary Services');
+        return __('Gas Station Observations');
     }
 
     public static function getNavigationGroup(): ?string

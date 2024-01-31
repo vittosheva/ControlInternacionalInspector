@@ -82,22 +82,17 @@ class FilamentConfigureUsingProvider extends ServiceProvider
 
         Select::configureUsing(function (Select $select): void {
             $select
-                ->live(onBlur: true)
-                ->afterStateUpdated(fn (Component $livewire, Select $component) => $livewire->validateOnly($component->getStatePath()))
-                ->preload()
+                //->live(onBlur: true)
+                //->afterStateUpdated(fn (Component $livewire, Select $component) => $livewire->validateOnly($component->getStatePath()))
+                //->preload()
                 ->searchable()
-                ->searchDebounce(500)
-                ->optionsLimit(50) // 25
+                //->searchDebounce(500)
+                //->optionsLimit(50) // 25
                 ->hintActions([
                     Action::make('remove_all')
                         ->label(__('Remove All'))
                         ->action(fn (Select $component) => $component->state([]))
                         ->visible(fn (Select $component) => is_array($component->getState()) && count($component->getState()) > 0),
-                    /*Action::make('select_all')
-                        ->label(__('Select All'))
-                        ->action(fn (Select $component) => $component->state(array_keys($component->getOptions())))
-                        ->visible(fn (Select $component) => is_array($component->getState()) && count($component->getState()) <= 0)
-                        ->hidden(fn (Select $component) => ! $component->isMultiple() || ! $component->isPreloaded()),*/
                 ])
                 ->native(false);
         });

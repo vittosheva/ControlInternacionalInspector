@@ -18,7 +18,7 @@ class ViewInspection extends ViewRecord
             GoBackAction::make()
                 ->url(InspectionResource::getUrl()),
             EditAction::make()
-                ->visible(auth()->user()->isAdmin()),
+                ->visible(fn ($record) => auth()->user()->isAdmin()),
             GeneratePdfAction::make()
                 ->visible(auth()->user()->isAdmin()),
         ];

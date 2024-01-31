@@ -48,6 +48,14 @@ class CreateInspection extends CreateRecord
         ];
     }
 
+    protected function getCancelFormAction(): Action
+    {
+        return Action::make('cancel')
+            ->label(__('filament-panels::resources/pages/create-record.form.actions.cancel.label'))
+            ->url(InspectionResource::getUrl())
+            ->color('gray');
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $date = now();

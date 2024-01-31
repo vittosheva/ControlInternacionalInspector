@@ -10,6 +10,7 @@ use App\Models\Inspections\BathroomComplianceObservation;
 use App\Models\Inspections\Company;
 use App\Models\Inspections\ControlRecord;
 use App\Models\Inspections\Station;
+use App\Models\Persona\User;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Fieldset;
@@ -18,15 +19,17 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\View;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Component;
+use Saade\FilamentAutograph\Forms\Components\SignaturePad;
 
 trait InspectionFormTrait
 {
@@ -56,7 +59,7 @@ trait InspectionFormTrait
 
             Select::make('company_id')
                 ->label(__('Trading Company'))
-                ->relationship('company', 'name', fn (Builder $query) => $query->oldest('name'))
+                ->options(Company::query()->oldest('name')->pluck('name', 'id')->toArray())
                 ->afterStateUpdated(function (Set $set, $state, Component $livewire) {
                     $company = Company::query()
                         ->find($state, [
@@ -86,6 +89,7 @@ trait InspectionFormTrait
                         'station_id' => null,
                     ]);
                 })
+                ->preload()
                 ->searchable()
                 ->selectablePlaceholder(false)
                 ->required()
@@ -93,16 +97,14 @@ trait InspectionFormTrait
 
             Select::make('station_id')
                 ->label(__('Gas Station'))
-                ->relationship('station', 'name', function (Builder $query, Get $get, $operation) {
-                    $query = $query->oldest('name');
-
-                    if ($operation === 'view') {
-                        return $query;
-                    }
-
+                ->options(function (Get $get, $operation) {
                     if (empty($get('company_id'))) {
-                        return $query->whereNull('id');
+                        return [];
                     }
+
+                    $stations = Station::query()
+                        ->where('company_id', '=', $get('company_id'))
+                        ->orderBy('name');
 
                     if ($operation === 'create') {
                         $stationsWithInspectionsInThisYearAndMonth = ControlRecord::query()
@@ -112,19 +114,19 @@ trait InspectionFormTrait
                             ->pluck('station_id')
                             ->toArray();
 
-                        return $query
-                            ->where('company_id', '=', $get('company_id'))
-                            ->whereNotIn('id', $stationsWithInspectionsInThisYearAndMonth);
+                        $stations = $stations->whereNotIn('id', $stationsWithInspectionsInThisYearAndMonth);
                     }
 
-                    return $query;
+                    return $stations
+                        ->pluck('name', 'id')
+                        ->toArray();
                 })
                 ->disableOptionWhen(fn (Get $get) => blank($get('company_id')))
-                ->live()
+                ->live(onBlur: true)
                 ->afterStateUpdated(function (Get $get, Set $set, $state, Component $livewire) {
                     $station = Station::query()
                         ->with('company:id,price_extra,price_super,price_diesel_1,price_diesel_2,price_eco_plus')
-                        ->find($state, ['id', 'company_id', 'street']);
+                        ->find($state, ['id', 'company_id', 'street', 'station_manager_name', 'station_manager_signature']);
 
                     $set('address', ! empty($station->street) ? $station->street : 'Sin dirección');
 
@@ -132,6 +134,9 @@ trait InspectionFormTrait
                     $set('price_super', $station->company->price_super ?? null);
                     $set('price_diesel_2', $station->company->price_diesel_2 ?? null);
                     $set('price_eco_plus', $station->company->price_eco_plus ?? null);
+
+                    $set('station_manager_name', $station->station_manager_name ?? null);
+                    $set('station_manager_signature', $station->station_manager_signature ?? null);
 
                     $livewire->validateOnly('price_extra');
                     $livewire->validateOnly('price_super');
@@ -213,7 +218,8 @@ trait InspectionFormTrait
                     ],
                 ])
                 ->visible(fn ($operation) => $operation !== 'create'),
-            HrPlaceholder::make(''),
+            HrPlaceholder::make('')
+                ->visible(fn ($operation) => $operation !== 'create'),
             Grid::make()
                 ->schema([
                     Checkbox::make('do_not_update')
@@ -227,7 +233,8 @@ trait InspectionFormTrait
                 ->extraAttributes(['class' => 'flex items-center justify-center'])
                 ->visible(fn ($operation) => $operation === 'edit')
                 ->columns(1),
-            HrPlaceholder::make(''),
+            HrPlaceholder::make('')
+                ->visible(fn ($operation) => $operation !== 'create'),
             Livewire::make(HosesPanel::class, [
                 'operation' => $operation,
                 'companyId' => $get('company_id'),
@@ -242,7 +249,7 @@ trait InspectionFormTrait
                         return false;
                     }
 
-                    if ($get('hose_inspections_completed')) {
+                    if ($get('do_not_update')) {
                         return false;
                     }
 
@@ -308,6 +315,7 @@ trait InspectionFormTrait
                                     ->orderBy('code')
                                     ->pluck('description', 'id')
                                     ->all(),
+                                'selected' => $record->bathroomComplianceObservations ?? [],
                             ],
                         ]),
                 ])
@@ -329,19 +337,101 @@ trait InspectionFormTrait
                         ->required(),
                 ])
                 ->columns(1)
-                ->columnSpan(2),
-            Fieldset::make('')
+                ->columnSpan(3),
+            Fieldset::make('¿Se permitió colocar sellos de calibración?')
                 ->schema([
-                    Toggle::make('allowed_to_place_calibration_seals')
-                        ->label(__('Se permitió colocar sellos de calibración?'))
-                        ->inline(false)
-                        ->default(true),
+                    Radio::make('allowed_to_place_calibration_seals')
+                        ->label('')
+                        ->inline()
+                        ->inlineLabel(false)
+                        ->options([
+                            true => __('Yes'),
+                            false => __('No'),
+                            null => __('N/A'),
+                        ])
+                        ->default(true)
                 ])
                 ->columns(1)
                 ->columnSpan(3),
-            MarkdownEditor::make('inspector_notes')
-                ->label(__('Additional Observations'))
-                ->columnSpan('full'),
+            Fieldset::make('¿Responsable de carta de calibración?')
+                ->schema([
+                    Radio::make('responsible_for_calibration_letter')
+                        ->label('')
+                        ->inline()
+                        ->inlineLabel(false)
+                        ->options([
+                            'CIE' => 'CIE',
+                            'Control P' => 'Control P',
+                            'E/S' => 'E/S',
+                        ])
+                        ->default('CIE')
+                        ->formatStateUsing(fn ($record) => empty($record->responsible_for_calibration_letter) ? 'CIE' : $record->responsible_for_calibration_letter)
+                ])
+                ->columns(1)
+                ->columnSpan(3),
+            Section::make(__('Personas presentes en la inspección'))
+                ->schema([
+                    Fieldset::make(config('app.name'))
+                        ->schema([
+                            Select::make('created_by')
+                                ->label(__('Inspector 1'))
+                                ->options(User::query()->role('Inspector')->pluck('name', 'id')->toArray())
+                                ->default(auth()->user()->id)
+                                ->inlineLabel()
+                                ->selectablePlaceholder(false)
+                                ->disabled(fn ($operation) => $operation === 'create' || auth()->user()->isInspector()),
+
+                            Select::make('inspector_name_2')
+                                ->label(__('Inspector 2'))
+                                ->options(User::query()->role('Inspector')->where('id', '<>', auth()->id())->pluck('name', 'id')->toArray())
+                                ->default(null)
+                                ->inlineLabel(),
+                        ])
+                        ->columns(1)
+                        ->columnSpan(5),
+                    Fieldset::make(function ($state, $record, $operation, Get $get) {
+                        $text = 'E/S';
+
+                        if ($operation === 'create' && ! empty($get('station_id'))) {
+                            $station = Station::find($get('station_id'), ['id', 'name']);
+                            return $text.' "'.$station->name.'"';
+                        }
+
+                        if ($operation === 'edit') {
+                            return $text.' "'.($record->station->name ?? null).'"';
+                        }
+
+                        return $text;
+                    })
+                        ->relationship('station')
+                        ->schema([
+                            TextInput::make('station_manager_name')
+                                ->label(__('Name')),
+                            SignaturePad::make('station_manager_signature')
+                                ->label(__('Signature'))
+                                ->dotSize(2.0)
+                                ->lineMinWidth(0.5)
+                                ->lineMaxWidth(2.5)
+                                ->throttle(16)
+                                ->minDistance(1)
+                                ->velocityFilterWeight(0.7),
+                        ])
+                        ->columns(1)
+                        ->columnSpan(7),
+                ])
+                ->collapsed(false)
+                ->collapsible()
+                ->columns(12)
+                ->columnSpanFull(),
+            Section::make(__('Additional Observations'))
+                ->schema([
+                    MarkdownEditor::make('inspector_notes')
+                        ->label(__('Notes'))
+                        ->columnSpan('full'),
+                ])
+                ->collapsed()
+                ->collapsible()
+                ->columnSpanFull(),
         ];
     }
 }

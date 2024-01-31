@@ -13,7 +13,10 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
+use Filament\Support\Facades\FilamentIcon;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
@@ -24,6 +27,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 class ObservationResource extends Resource
 {
@@ -97,12 +102,31 @@ class ObservationResource extends Resource
                     EditAction::make()
                         ->modalWidth(MaxWidth::ExtraLarge)
                         ->slideOver(),
-                    DeleteAction::make(),
+                    //DeleteAction::make(),
+                    Action::make('active')
+                        ->label('Activar/Desactivar')
+                        ->icon('heroicon-m-check-circle')
+                        ->requiresConfirmation()
+                        ->action(function (Model $record) {
+                            $record->active = ! $record->active;
+                            $record->save();
+                        }),
                 ]),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    //DeleteBulkAction::make(),
+                    BulkAction::make('active')
+                        ->label('Activar/Desactivar')
+                        ->icon('heroicon-m-check-circle')
+                        ->requiresConfirmation()
+                        ->action(function (Collection $records) {
+                            $records->each(function ($record) {
+                                $record->active = ! $record->active;
+                                $record->save();
+                            });
+                        })
+                        ->deselectRecordsAfterCompletion(),
                 ]),
             ])
             ->reorderable('priority', true)

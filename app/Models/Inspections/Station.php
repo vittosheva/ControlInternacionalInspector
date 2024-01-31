@@ -17,6 +17,13 @@ class Station extends Model implements Auditable
 
     protected $table = 'stations';
 
+    protected $fillable = [
+        'name', 'code', 'company_id', 'station_type_id', 'region_id', 'octane_super', 'octane_extra', 'flash_point',
+        'price_super', 'price_extra', 'price_diesel_1', 'price_diesel_2', 'price_eco_plus',
+        'location_id', 'street', 'active', 'octane_eco_plus', 'email_customer',
+        'station_manager_name', 'station_manager_signature',
+    ];
+
     protected static function boot(): void
     {
         parent::boot();

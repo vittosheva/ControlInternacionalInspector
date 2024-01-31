@@ -114,6 +114,8 @@ class MainPanelProvider extends PanelProvider
             ->colors([
                 'primary' => config('dorsi.filament.modules.colors.main'),
             ])
+            ->databaseNotifications()
+            ->databaseNotificationsPolling(null)
             ->navigationGroups([
                 NavigationGroup::make()->label(__('Controls')),
                 NavigationGroup::make()->label(__('Observation & Services')),

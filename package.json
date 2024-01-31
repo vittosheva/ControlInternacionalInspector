@@ -22,6 +22,6 @@
   },
   "dependencies": {
     "@danharrin/alpine-mousetrap": "^0.1.5",
-    "puppeteer": "^21.7.0"
+    "puppeteer": "^21.10.0"
   }
 }

@@ -30,7 +30,7 @@ class BathroomComplianceObservationResource extends Resource
 
     protected static ?string $navigationIcon = 'lucide-bath';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
     {

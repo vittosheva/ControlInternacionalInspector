@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Forms\Components\HrPlaceholder;
 use App\Models\Inspections\ControlRecord;
 use App\Models\Inspections\ControlRecordDetail;
+use App\Models\Inspections\GasStationObservation;
 use App\Models\Inspections\Hose;
 use App\Models\Inspections\Measurement;
 use App\Models\Inspections\Observation;
@@ -36,7 +37,9 @@ class HosesPanel extends Component implements HasForms
 
     public ?array $data = [];
 
-    public array $observations = [];
+    public array $observationsCompany = [];
+
+    public array $observationsGasStation = [];
 
     public array $measurements = [];
 
@@ -71,14 +74,20 @@ class HosesPanel extends Component implements HasForms
         $this->hoses = $this->getHoses();
         $this->dataCollection = collect();
 
-        $this->observations = Observation::query()
+        $this->observationsCompany = Observation::query()
+            ->orderBy('priority')
+            ->orderBy('id')
+            ->pluck('name', 'id')
+            ->toArray();
+
+        $this->observationsGasStation = GasStationObservation::query()
             ->orderBy('priority')
             ->orderBy('id')
             ->pluck('name', 'id')
             ->toArray();
 
         $this->measurements = Measurement::query()
-            ->whereBetween('id', [1, 13])
+            ->orderBy('order_measurements')
             ->pluck('name', 'id')
             ->toArray();
     }
@@ -140,11 +149,11 @@ class HosesPanel extends Component implements HasForms
                 Fieldset::make(__('Data to be modified').':')
                     ->schema([
                         Select::make('observation_id')
-                            ->label(__('Observation'))
-                            ->options(fn () => $this->observations)
+                            ->label(__('Observation ARCERNNR'))
+                            ->options(fn () => $this->observationsCompany)
                             ->default(4)
                             ->disableOptionWhen(fn () => empty($this->selectedHose))
-                            ->live()
+                            ->live(onBlur: true)
                             ->afterStateUpdated(function (Component $livewire, Set $set, $state) {
                                 if ($state == 4) {
                                     $set('quantity', 0);
@@ -203,7 +212,9 @@ class HosesPanel extends Component implements HasForms
                         TextInput::make('octane')
                             ->label(__('Octane'))
                             ->default(0)
-                            ->live(onBlur: true)
+                            ->live(onBlur: true)->rules([
+                                'numeric',
+                            ])
                             ->afterStateUpdated(function (Component $livewire, TextInput $component, Get $get, Set $set) {
                                 $livewire->validateOnly($component->getStatePath());
 
@@ -211,9 +222,6 @@ class HosesPanel extends Component implements HasForms
                                     $set('octane', 0);
                                 }
                             })
-                            ->rules([
-                                'numeric',
-                            ])
                             ->extraInputAttributes(['class' => 'text-right'])
                             ->required(function () {
                                 if (auth()->user()->isAdmin()) {
@@ -227,10 +235,11 @@ class HosesPanel extends Component implements HasForms
                         TextInput::make('totalizator')
                             ->label(__('Totalizator'))
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Component $livewire, TextInput $component) => $livewire->validateOnly($component->getStatePath()))
                             ->rules([
+                                'required',
                                 'numeric',
                             ])
+                            ->afterStateUpdated(fn (Component $livewire, TextInput $component) => $livewire->validateOnly($component->getStatePath()))
                             ->disabled(fn () => empty($this->selectedHose))
                             ->required()
                             ->extraInputAttributes(['class' => 'text-right'])
@@ -253,6 +262,7 @@ class HosesPanel extends Component implements HasForms
                         Select::make('measurement_id_sec_1')
                             ->label(__('Medida actual'))
                             ->options(fn () => $this->measurements)
+                            ->preload()
                             ->live()
                             ->afterStateHydrated(function (Select $component, ?string $state) {
                                 if (! empty($this->selectedHose) && empty($state)) {
@@ -277,10 +287,10 @@ class HosesPanel extends Component implements HasForms
 
                         Select::make('company_observation_id')
                             ->label(__('Observation Gas Station'))
-                            ->options(fn () => $this->observations)
+                            ->options(fn () => $this->observationsGasStation)
                             ->default(4)
                             ->disableOptionWhen(fn () => empty($this->selectedHose))
-                            ->live()
+                            ->live(onBlur: true)
                             ->afterStateUpdated(function (Set $set, $state) {
                                 if ($state == 4) {
                                     $set('quantity', 0);
@@ -323,6 +333,7 @@ class HosesPanel extends Component implements HasForms
 
         $hoseName = $this->hoses->firstWhere('id', '=', $this->selectedHose)->name ?? null;
         $selected = $this->dataCollection->first(fn ($value, $key) => $key === $hoseName);
+        $lastMonth = false;
 
         if ($this->operation === 'create') {
             if (! empty($selected)) {
@@ -340,14 +351,31 @@ class HosesPanel extends Component implements HasForms
             }
 
             $control = $this->getControlRecordFromDatabase(false);
+        } else {
+            $lastMonth = true;
         }
 
-        if (
-            empty($control)
-            || empty($control->details)
-            || empty($control->details->firstWhere('hose_id', '=', $id))
-        ) {
-            return;
+        if (empty($control) || empty($control->details) || empty($control->details->firstWhere('hose_id', '=', $id))) {
+            $control = $this->getControlRecordFromDatabase();
+
+            if (empty($control) || empty($control->details) || empty($control->details->firstWhere('hose_id', '=', $id))) {
+                $selected = $this->hoses->firstWhere('id', '=', $this->selectedHose);
+
+                $this->form->fill([
+                    'hose_id' => $selected->id,
+                    'color' => $selected->color,
+                    'seal_found' => $selected->current_seal ?? null,
+                    'seal_left' => $selected->seal_left ?? null,
+                    'hose' => $selected->name,
+                    'fuel' => $selected->type->name,
+                    'product' => $selected->type->code,
+                    'quantity' => $this->calculate($selected, 'quantity', $lastMonth),
+                    'octane' => $this->calculate($selected, 'octane', $lastMonth),
+                    'measurement_id' => 0,
+                ]);
+
+                return;
+            }
         }
 
         $selected = $control->details->firstWhere('hose_id', '=', $id);
@@ -370,8 +398,8 @@ class HosesPanel extends Component implements HasForms
                 'fuel' => $selected->hose->type->name,
                 'product' => $selected->hose->type->code,
                 'color' => $this->hoses->firstWhere('id', '=', $this->selectedHose)->color,
-                'quantity' => (empty($selected->quantity) && $this->operation === 'edit') ? $selected->quantity : 0,
-                'octane' => (empty($selected->octane) && $this->operation === 'edit') ? $selected->octane : 0,
+                'quantity' => $this->calculate($selected, 'quantity', $lastMonth),
+                'octane' => $this->calculate($selected, 'octane', $lastMonth),
                 'measurement_id' => $selected->measurement->id ?? 0,
             ]
         );
@@ -437,5 +465,22 @@ class HosesPanel extends Component implements HasForms
             ->where('month', '=', $subtract ? now()->subMonth()->format('n') : now()->format('n'))
             ->latest('inspection_date')
             ->first();
+    }
+
+    protected function calculate($selected, $variable, $lastMonth = false): int
+    {
+        if ($this->operation === 'create') {
+            return 0;
+        }
+
+        if ($this->operation === 'edit') {
+            if (! empty($selected->$variable)) {
+                return $selected->$variable;
+            }
+
+            return 0;
+        }
+
+        return $selected->$variable;
     }
 }

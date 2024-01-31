@@ -29,7 +29,9 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Colors\Color;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -116,7 +118,7 @@ class InspectionResource extends Resource
                 ])
                     ->nextAction(fn (Action $action) => $action->label(fn () => __('Next').' ->')->color(Color::Gray))
                     ->previousAction(fn (Action $action) => $action->label(fn () => '<- '.__('Previous')))
-                    ->startOnStep(1)
+                    ->startOnStep(3)
                     ->skippable(fn ($operation) => $operation === 'view')
                     ->columnSpanFull(),
             ])
@@ -327,13 +329,14 @@ class InspectionResource extends Resource
                         ->visible(auth()->user()->isAdmin()),
                 ]),
             ])
-            /*->bulkActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->requiresConfirmation()
                         ->visible(auth()->user()->isAdmin()),
-                ]),
-            ])*/
+                ])
+                    ->visible(auth()->user()->isAdmin()),
+            ])
             ->groups([
                 Group::make('inspection_date')
                     ->label(__('Inspection Date'))

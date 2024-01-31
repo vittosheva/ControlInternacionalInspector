@@ -548,7 +548,9 @@ namespace App\Models\Inspections{
  * @property string|null $price_eco_plus
  * @property string|null $inspector_notes
  * @property string|null $serafin_code
- * @property bool|null $allowed_to_place_calibration_seals
+ * @property int|null $allowed_to_place_calibration_seals
+ * @property string|null $responsible_for_calibration_letter
+ * @property int|null $inspector_name_2
  * @property int|null $created_by Related User in Inspector database (not local users tables)
  * @property int|null $updated_by Related User in Inspector database (not local users tables)
  * @property string|null $inspection_report_pdf
@@ -593,6 +595,7 @@ namespace App\Models\Inspections{
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecord whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecord whereInspectionDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecord whereInspectionReportPdf($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecord whereInspectorName2($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecord whereInspectorNotes($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecord whereMonth($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecord whereObservations($value)
@@ -604,6 +607,7 @@ namespace App\Models\Inspections{
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecord wherePriceEcoPlus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecord wherePriceExtra($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecord wherePriceSuper($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecord whereResponsibleForCalibrationLetter($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecord whereSerafinCode($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecord whereStationId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecord whereUpdatedAt($value)
@@ -790,6 +794,33 @@ namespace App\Models\Inspections{
  * @method static \Illuminate\Database\Eloquent\Builder|EnvironmentalObservation whereUpdatedAt($value)
  */
 	class EnvironmentalObservation extends \Eloquent implements \OwenIt\Auditing\Contracts\Auditable {}
+}
+
+namespace App\Models\Inspections{
+/**
+ * App\Models\Inspections\GasStationObservation
+ *
+ * @property int $id Identifier
+ * @property string $name Name
+ * @property int $priority Priority: 2=HIGH, 1=NORMAL, 0=MINOR
+ * @property string $color HEX color code
+ * @property int $active Activated
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \OwenIt\Auditing\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|GasStationObservation newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|GasStationObservation newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|GasStationObservation query()
+ * @method static \Illuminate\Database\Eloquent\Builder|GasStationObservation whereActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|GasStationObservation whereColor($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|GasStationObservation whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|GasStationObservation whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|GasStationObservation whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|GasStationObservation wherePriority($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|GasStationObservation whereUpdatedAt($value)
+ */
+	class GasStationObservation extends \Eloquent implements \OwenIt\Auditing\Contracts\Auditable {}
 }
 
 namespace App\Models\Inspections{
@@ -1010,6 +1041,8 @@ namespace App\Models\Inspections{
  * @property float|null $octane_eco_plus
  * @property string|null $price_eco_plus
  * @property string|null $email_customer
+ * @property string|null $station_manager_name
+ * @property string|null $station_manager_signature
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \OwenIt\Auditing\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \App\Models\Inspections\Company $company
@@ -1037,6 +1070,8 @@ namespace App\Models\Inspections{
  * @method static \Illuminate\Database\Eloquent\Builder|Station wherePriceExtra($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Station wherePriceSuper($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Station whereRegionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Station whereStationManagerName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Station whereStationManagerSignature($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Station whereStationTypeId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Station whereStreet($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Station whereUpdatedAt($value)

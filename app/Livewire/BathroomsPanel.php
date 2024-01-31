@@ -4,10 +4,9 @@ namespace App\Livewire;
 
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Notifications\Notification;
-use Filament\Support\Colors\Color;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
@@ -23,29 +22,37 @@ class BathroomsPanel extends Component implements HasForms
 
     public ?array $bathrooms = [];
 
+    public ?Collection $selected = null;
+
+    public function mount(): void
+    {
+        $items = [];
+        $selected = [];
+
+        if (! empty($this->selected)) {
+            $selected = $this->selected->mapWithKeys(fn ($data) => [$data->bathroom_compliance_observations_id => [$data->men, $data->women, $data->disability_person]])->toArray();
+        }
+
+        for ($bathroom = 1; $bathroom <= count($this->bathrooms); $bathroom++) {
+            $items[$bathroom] = [
+                'men' => (bool) $selected[$bathroom][0] ?? false,
+                'women' => (bool) $selected[$bathroom][1] ?? false,
+                'disability_person' => (bool) $selected[$bathroom][2] ?? false,
+            ];
+        }
+
+        $this->data[$this->relationName] = $items;
+    }
+
     public function render(): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
     {
         return view('livewire.bathrooms-panel');
     }
 
-    public function addBathroomCheck($id, $type): void
+    public function addBathroomCheck(): void
     {
-        $this->data[$id] = array_merge($this->data[$id], $type);
-
-        /*if (empty($this->data['bathroom_compliance_observations']) || count($this->data['bathroom_compliance_observations']) <= 0) {
-            Notification::make()
-                ->title('No ha marcado ninguna "Observación cumplimiento baños".')
-                ->color(Color::Amber)
-                ->warning()
-                ->send();
-        }
-
-        Notification::make()
-            ->title('Servicios complementarios y observaciones agregados.')
-            ->color(Color::Blue)
-            ->info()
-            ->send();
-
-        $this->dispatch('complementaryServicesUpdated', $this->data);*/
+        $this->dispatch('complementaryServicesUpdated', [
+            'bathroom_compliance_observations' => $this->data[$this->relationName],
+        ]);
     }
 }

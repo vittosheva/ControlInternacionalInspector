@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Pdf;
 
 use App\Http\Controllers\Controller;
+use App\Models\Inspections\BathroomComplianceObservation;
+use App\Models\Inspections\ComplementaryService;
 use App\Models\Inspections\ControlRecord;
+use App\Models\Inspections\EnvironmentalObservation;
 use App\Models\Inspections\InspectionSetting;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -40,6 +43,8 @@ class GenerateController extends Controller
                 'complementaryServices',
                 'environmentalObservations',
                 'bathroomComplianceObservations',
+                'creator:id,name,signature',
+                'additionalInspector:id,name',
             ])
             ->find($this->optimus->decode($record));
 
@@ -52,6 +57,11 @@ class GenerateController extends Controller
             'record' => $this->document,
             'inspectionSettings' => InspectionSetting::query()->pluck('name', 'id')->all(),
             'badHoses' => 0,
+            'complementaryServices' => ComplementaryService::all()->pluck('description', 'id')->all(),
+            'environmentalObservations' => EnvironmentalObservation::all()->pluck('description', 'id')->all(),
+            'bathroomComplianceObservations' => BathroomComplianceObservation::all()->pluck('description', 'id')->all(),
+            'checkMark' => '✓',
+            'wrongMark' => '-',
         ];
 
         if (request()->has('html')) {
@@ -65,7 +75,7 @@ class GenerateController extends Controller
             ->name($name.'.pdf')
             ->landscape()
             ->format(Format::A4)
-            ->margins(6, 6, 6, 6);
+            ->margins(1, 3, 1, 3);
 
         $this->document->inspection_report_pdf = $name.'.pdf';
         $this->document->save();

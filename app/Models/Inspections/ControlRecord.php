@@ -27,12 +27,12 @@ class ControlRecord extends Model implements Auditable
         'arch_letter_sent', 'arch_letter_delivered', 'arch_letter_delivered_at', 'arch_letter_sent_at', 'active',
         'price_diesel_1', 'price_diesel_2', 'price_extra', 'price_super', 'octane_eco_plus', 'price_eco_plus',
         'inspector_notes', 'serafin_code', 'allowed_to_place_calibration_seals', 'created_by', 'updated_by',
-        'inspection_report_pdf', 'admin_authorization',
+        'inspection_report_pdf', 'admin_authorization', 'responsible_for_calibration_letter', 'inspector_name_2',
     ];
 
     protected $casts = [
         'inspection_date' => 'date:Y-m-d',
-        'allowed_to_place_calibration_seals' => 'boolean',
+        //'allowed_to_place_calibration_seals' => 'boolean',
         'admin_authorization' => 'boolean',
     ];
 
@@ -68,6 +68,11 @@ class ControlRecord extends Model implements Auditable
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function additionalInspector(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'inspector_name_2');
     }
 
     public function details(): HasMany

@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style type="text/tailwindcss">
         @layer utilities {
-            * { @apply text-[6pt] text-black; }
+            * { @apply text-[5.5pt] text-black leading-tight; }
             .table { @apply w-full; }
             .thead { @apply uppercase font-bold bg-zinc-300; }
             .thead-th { @apply px-3 py-1 border border-black text-center; }
@@ -15,11 +15,11 @@
             .thead-th-inner { @apply px-3 py-1 border border-black text-center font-bold uppercase bg-zinc-300; }
             .thead-th-upper { @apply px-3 py-0.5 border-0 text-center mx-auto !bg-white; }
             .tbody-td-thin { @apply px-3 py-0.5 border border-black text-left text-[5pt]; }
-            .tbody-td-thin * { @apply !text-[5pt]; }
-            .tbody-td-thin-underline { @apply px-3 py-0.5 border border-black text-left text-[5pt] uppercase underline; }
-            .tbody-td-thin-tiny { @apply px-3 py-0.5 border border-black text-left text-[4pt]; }
-            .checkmark { @apply text-slate-800 text-[6pt]; }
-            .footer-text, .footer-text > * { @apply !text-[5pt]; }
+            .tbody-td-thin * { @apply !text-[4.5pt]; }
+            .tbody-td-thin-underline { @apply px-3 py-0.5 border border-black text-left text-[4.5pt] uppercase underline; }
+            .tbody-td-thin-tiny { @apply px-3 py-0.5 border border-black text-left text-[3.5pt]; }
+            .checkmark { @apply text-slate-800 text-[5.5pt]; }
+            .footer-text, .footer-text > * { @apply !text-[4.5pt]; }
             .no-br > * { @apply !p-0 !m-0; }
             .super-center { @apply flex items-center justify-center; }
         }
@@ -110,124 +110,158 @@
                 </tr>
                 <tr>
                     <td class="tbody-td-thin" colspan="8">
-                        <div class="inline-flex">{!! $inspectionSettings[12] ?? '' !!}</div> <span class="px-4">SI</span> <span class="checkmark">✓</span> <span class="px-4">NO</span> <span class="px-4">N/A</span>
+                        <span class="inline-flex">{!! $inspectionSettings[12] ?? '' !!}</span>
+                        <span class="px-4">SI</span> <span class="checkmark">{!! $record->allowed_to_place_calibration_seals === 1 ? $checkMark : '' !!}</span>
+                        <span class="px-4">NO</span> <span class="checkmark">{!! $record->allowed_to_place_calibration_seals === 0 ? $checkMark : '' !!}</span>
+                        <span class="px-4">N/A</span> <span class="checkmark">{!! $record->allowed_to_place_calibration_seals === null ? $checkMark : '' !!}</span>
                     </td>
                     <td class="tbody-td-thin" colspan="5">
-                        <div class="inline-flex">{!! $inspectionSettings[13] ?? '' !!}</div> <span class="px-4">CIE</span> <span class="px-4">Control P</span> <span class="checkmark">✓</span> <span class="px-4">E/S</span>
+                        <span class="inline-flex">{!! $inspectionSettings[12] ?? '' !!}</span>
+                        <span class="px-4">CIE</span> <span class="checkmark">{!! $record->responsible_for_calibration_letter === 'CIE' ? $checkMark : '' !!}</span>
+                        <span class="px-4">Control P</span> <span class="checkmark">{!! $record->responsible_for_calibration_letter === 'Control P' ? $checkMark : '' !!}</span>
+                        <span class="px-4">E/S</span> <span class="checkmark">{!! $record->responsible_for_calibration_letter === 'E/S' ? $checkMark : '' !!}</span>
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="13" style="padding:0 0 0 2px;">
-                        <div class="w-full grid grid-rows-6 grid-cols-5 grid-flow-col gap-0 -m-0.5">
-                            <div class="row-span-3 p-0 col-span-2">
+                    <td colspan="13">
+                        <div class="w-full grid grid-rows-6 grid-cols-12 grid-flow-col gap-0 -m-0.5">
+                            <div class="row-span-4 p-0 col-span-4">
                                 <div class="thead-th-inner !border-t-0 !border-r-0 !text-[5pt]">Inspección de servicios complementarios</div>
-                                <div class="w-full h-[calc(100%_-_15px)] grid grid-cols-12">
-                                    @forelse ($record->complementaryServices as $key => $controlRecordService)
+                                <div class="w-full h-[calc(100%_-_12px)] grid grid-cols-12 gap-0">
+                                    @forelse ($complementaryServices as $key => $controlRecordService)
                                         <div class="col-span-2 tbody-td-thin-tiny !border-t-0 !border-r-0 !text-center super-center">{{ $loop->iteration }}</div>
-                                        <div class="col-span-3 tbody-td-thin-tiny !border-t-0 !border-r-0 !text-center super-center">{{ $controlRecordService->complete == 1 ? '✓' : 'X' }}</div>
-                                        <div class="col-span-7 tbody-td-thin-tiny !border-t-0 !border-r-0 super-center !justify-start">{{ $controlRecordService?->complementaryService?->description ?? '-' }}</div>
+                                        <div class="col-span-3 tbody-td-thin-tiny !border-t-0 !border-r-0 !text-center super-center">
+                                            {!! ($record->complementaryServices->firstWhere('complementary_services_id', '=', $key)->complete ?? 0) == 1 ? $checkMark : $wrongMark !!}
+                                        </div>
+                                        <div class="col-span-7 tbody-td-thin-tiny !border-t-0 !border-r-0 super-center !justify-start">{{ $controlRecordService }}</div>
                                     @empty
                                     @endforelse
                                 </div>
                             </div>
-                            <div class="row-span-2 p-0 col-span-2">
-                                <div class="thead-th-inner !border-t-0 !border-r-0 !text-[5pt]">Personas presentes en la inspección</div>
-                                <div class="w-full h-[calc(100%_-_15px)] grid grid-cols-12">
-                                    <div class="col-span-5 tbody-td-thin-tiny !border-t-0 !border-r-0 !text-center">&nbsp;</div>
+                            <div class="row-span-2 p-0 col-span-4">
+                                <div class="thead-th-inner !border-t-0- !border-r-0 !text-[5pt]">Personas presentes en la inspección</div>
+                                <div class="w-full h-[calc(100%_-_14px)] grid grid-cols-12 gap-0">
+                                    <div class="col-span-5 tbody-td-thin-tiny !border-t-0 !border-r-0 !text-center !p-0">
+                                        @if(! empty($record->creator->name) && ! empty($record->additionalInspector->name))
+                                        <div class="grid grid-cols-1 grid-rows-2 gap-0 h-full">
+                                            <div class="col-span-1 row-span-1 h-full super-center border-b border-black">{{ $record->creator->name }}</div>
+                                            <div class="col-span-1 row-span-1 h-full super-center">{{ $record->additionalInspector->name }}</div>
+                                        </div>
+                                        @elseif(! empty($record->creator->name) && empty($record->additionalInspector->name))
+                                        <div class="grid grid-cols-1 grid-rows-1 gap-0 h-full">
+                                            <div class="col-span-1 row-span-1 h-full flex items-center justify-center">{{ $record->creator->name }}</div>
+                                        </div>
+                                        @endif
+                                    </div>
                                     <div class="col-span-7 tbody-td !border-t-0 !border-r-0 !font-bold uppercase super-center">{{ config('app.name') }}</div>
-                                    <div class="col-span-5 tbody-td-thin-tiny !border-t-0 !border-r-0 !text-center">&nbsp;</div>
+                                    <div class="col-span-5 tbody-td-thin !border-t-0 !border-r-0 !text-center super-center">{{ $record->station->station_manager_name ?? null }}</div>
                                     <div class="col-span-7 tbody-td !border-t-0 !border-r-0 !font-bold uppercase super-center">@if (! empty($record->station->name)) {{ 'E-S "'.$record->station->name.'"' }} @endif</div>
                                 </div>
                             </div>
-                            <div class="row-span-3 p-0 col-span-1">
+                            <div class="row-span-3 p-0 col-span-2">
                                 <div class="thead-th-inner !border-t-0 !border-r-0 !text-[5pt]">MEDIDAS DE TANQUES</div>
-                                <div class="w-full h-[calc(100%_-_15px)] grid grid-cols-12">
+                                <div class="w-full h-[calc(100%_-_12px)] grid grid-cols-12 gap-0">
                                     <div class="col-span-3 tbody-td !border-0 !border-b !border-l"></div>
-                                    <div class="col-span-5 tbody-td !border-t-0 !border-r-0">PROOT.</div>
-                                    <div class="col-span-4 tbody-td !border-t-0 !border-r-0">AGUA</div>
+                                    <div class="col-span-5 tbody-td-thin !text-center !border-t-0 !border-r-0">PROOT.</div>
+                                    <div class="col-span-4 tbody-td-thin !text-center !border-t-0 !border-r-0">AGUA</div>
 
-                                    <div class="col-span-3 tbody-td !border-0 !border-b !border-l">SUPER</div>
+                                    <div class="col-span-3 tbody-td-thin !text-center !border-0 !border-b !border-l">SUPER</div>
                                     <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
                                     <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
-                                    <div class="col-span-3 tbody-td !border-0 !border-b !border-l">SUPER</div>
-                                    <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
-                                    <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
-
-                                    <div class="col-span-3 tbody-td !border-0 !border-b !border-l">ECOPAIS</div>
-                                    <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
-                                    <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
-                                    <div class="col-span-3 tbody-td !border-0 !border-b !border-l">ECOPAIS</div>
-                                    <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
-                                    <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
-                                    <div class="col-span-3 tbody-td !border-0 !border-b !border-l">ECOPAIS</div>
+                                    <div class="col-span-3 tbody-td-thin !text-center !border-0 !border-b !border-l">SUPER</div>
                                     <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
                                     <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
 
-                                    <div class="col-span-3 tbody-td !border-0 !border-b !border-l">DIESEL P.</div>
+                                    <div class="col-span-3 tbody-td-thin !text-center !border-0 !border-b !border-l">ECOPAIS</div>
                                     <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
                                     <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
-                                    <div class="col-span-3 tbody-td !border-0 !border-b !border-l">DIESEL P.</div>
+                                    <div class="col-span-3 tbody-td-thin !text-center !border-0 !border-b !border-l">ECOPAIS</div>
+                                    <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
+                                    <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
+                                    <div class="col-span-3 tbody-td-thin !text-center !border-0 !border-b !border-l">ECOPAIS</div>
+                                    <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
+                                    <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
+
+                                    <div class="col-span-3 tbody-td-thin !text-center !border-0 !border-b !border-l">DIESEL P.</div>
+                                    <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
+                                    <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
+                                    <div class="col-span-3 tbody-td-thin !text-center !border-0 !border-b !border-l">DIESEL P.</div>
                                     <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
                                     <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
                                 </div>
                             </div>
-                            <div class="row-span-2 p-0 col-span-1">
+                            <div class="row-span-2 p-0 col-span-2">
                                 <div class="tbody-td !border-t-0 !border-r-0">MEDIDAS SACADAS</div>
-                                <div class="w-full h-[calc(100%_-_15px)] grid grid-cols-12">
-                                    <div class="col-span-3 tbody-td !border-0 !border-b !border-l super-center">SUPER</div>
-                                    <div class="col-span-8 tbody-td !border-0 !border-b !border-l super-center">X</div>
-                                    <div class="col-span-1 tbody-td !border-0 !border-b super-center">gal</div>
-                                    <div class="col-span-3 tbody-td !border-0 !border-b !border-l super-center">ECOPAIS</div>
-                                    <div class="col-span-8 tbody-td !border-0 !border-b !border-l super-center">X</div>
-                                    <div class="col-span-1 tbody-td !border-0 !border-b super-center">gal</div>
-                                    <div class="col-span-3 tbody-td !border-0 !border-b !border-l super-center">DIESEL P.</div>
-                                    <div class="col-span-8 tbody-td !border-0 !border-b !border-l super-center">X</div>
-                                    <div class="col-span-1 tbody-td !border-0 !border-b super-center">gal</div>
+                                <div class="w-full h-[calc(100%_-_12px)] grid grid-cols-12 gap-0">
+                                    <div class="col-span-3 tbody-td-thin !border-0 !border-b !border-l super-center">SUPER</div>
+                                    <div class="col-span-8 tbody-td-thin !border-0 !border-b !border-l super-center">X</div>
+                                    <div class="col-span-1 tbody-td-thin !border-0 !border-b super-center">gal</div>
+                                    <div class="col-span-3 tbody-td-thin !border-0 !border-b !border-l super-center">ECOPAIS</div>
+                                    <div class="col-span-8 tbody-td-thin !border-0 !border-b !border-l super-center">X</div>
+                                    <div class="col-span-1 tbody-td-thin !border-0 !border-b super-center">gal</div>
+                                    <div class="col-span-3 tbody-td-thin !border-0 !border-b !border-l super-center">DIESEL P.</div>
+                                    <div class="col-span-8 tbody-td-thin !border-0 !border-b !border-l super-center">X</div>
+                                    <div class="col-span-1 tbody-td-thin !border-0 !border-b super-center">gal</div>
                                 </div>
                             </div>
-                            <div class="row-span-1 p-0 col-span-5">
-                                <div class="w-full h-full grid grid-cols-12">
-                                    <div class="col-span-2 tbody-td-thin !border-t-0 !border-r-0 !border-l super-center">{!! $inspectionSettings[4] ?? '' !!}</div>
-                                    <div class="col-span-3 tbody-td-thin !border-t-0 !border-r-0 uppercase super-center">ELABORADO:&nbsp;<span class="!lowercase">{{ \Jenssegers\Date\Date::now()->format('F d \d\e\l Y') }}</span></div>
-                                    <div class="col-span-2 tbody-td-thin !border-t-0 !border-r-0 super-center">{!! $inspectionSettings[5] ?? '' !!}</div>
-                                    <div class="col-span-5 tbody-td-thin !border-t-0 super-center !text-center">{!! $inspectionSettings[6] ?? '' !!}</div>
+                            <div class="row-span-1 p-0 col-span-8">
+                                <div class="w-full h-full grid grid-cols-7 gap-0">
+                                    <div class="col-span-1 tbody-td-thin !border-t-0 !border-r-0 !border-l super-center">{!! $inspectionSettings[4] ?? '' !!}</div>
+                                    <div class="col-span-2 tbody-td-thin !border-t-0 !border-r-0 uppercase super-center">ELABORADO:&nbsp;<span class="!lowercase">{{ \Jenssegers\Date\Date::now()->format('F d \d\e\l Y') }}</span></div>
+                                    <div class="col-span-1 tbody-td-thin !border-t-0 !border-r-0 super-center">{!! $inspectionSettings[5] ?? '' !!}</div>
+                                    <div class="col-span-3 tbody-td-thin !border-t-0 super-center !text-center">{!! $inspectionSettings[6] ?? '' !!}</div>
                                 </div>
                             </div>
-                            <div class="row-span-3 p-0 col-span-1">
+                            <div class="row-span-3 p-0 col-span-3">
                                 <div class="thead-th-inner !border-t-0 !border-r-0 !text-[5pt]">Observaciones ambientales</div>
-                                <div class="w-full h-[calc(100%_-_15px)] grid grid-cols-12">
-                                    @forelse ($record->environmentalObservations as $key => $controlRecordEnvironmental)
-                                        <div class="col-span-6 tbody-td-thin-tiny !border-t-0 !border-r-0 super-center !justify-start">{{ $controlRecordEnvironmental?->environmentalObservation?->description ?? '-' }}</div>
-                                        <div class="col-span-6 tbody-td-thin-tiny !border-t-0 !border-r-0 !text-center super-center">{{ $controlRecordEnvironmental->complete == 1 ? '✓' : 'X' }}</div>
+                                <div class="w-full h-[calc(100%_-_12px)] grid grid-cols-12 gap-0">
+                                    @forelse ($environmentalObservations as $key => $environmentalObservation)
+                                        <div class="col-span-6 tbody-td-thin-tiny !border-t-0 !border-r-0 super-center !justify-start">{{ $environmentalObservation }}</div>
+                                        <div class="col-span-6 tbody-td-thin-tiny !border-t-0 !border-r-0 !text-center super-center">
+                                            {!! ($record->environmentalObservations->firstWhere('environmental_observations_id', '=', $key)->complete ?? 0) == 1 ? $checkMark : $wrongMark !!}
+                                        </div>
                                     @empty
                                     @endforelse
                                 </div>
                             </div>
-                            <div class="row-span-2 p-0 col-span-1">
+                            <div class="row-span-2 p-0 col-span-3">
                                 <div class="tbody-td !border-t-0 !border-r-0 !text-left">OBSERVACIONES ADICIONALES:</div>
-                                <div class="w-full h-[calc(100%_-_15px)] tbody-td !border-t-0 !border-r-0 underline underline-offset-4 !text-left leading-8 grid justify-items-stretch">{!! $record->inspector_notes ?? '' !!}</div>
+                                <div class="w-full h-[calc(100%_-_12px)] tbody-td !border-t-0 !border-r-0 underline underline-offset-2 !text-left leading-6 grid justify-items-stretch">{!! $record->inspector_notes ?? '' !!}</div>
                             </div>
-                            <div class="row-span-3 p-0 col-span-1">
+                            <div class="row-span-3 p-0 col-span-3">
                                 <div class="thead-th-inner !border-t-0 !text-[5pt]">Observaciones cumplimiento baños</div>
-                                <div class="w-full h-[calc(100%_-_15px)] grid grid-cols-12">
+                                <div class="w-full h-[calc(100%_-_12px)] grid grid-cols-12 gap-0">
                                     <div class="col-span-5 tbody-td-thin-tiny !text-center !border-t-0 !border-r-0 super-center !justify-start">ÍTEMS A INSPECCIONAR</div>
                                     <div class="col-span-2 tbody-td-thin-tiny !text-center !border-t-0 !border-r-0 super-center">Hombres</div>
                                     <div class="col-span-2 tbody-td-thin-tiny !text-center !border-t-0 !border-r-0 super-center">Mujeres</div>
                                     <div class="col-span-3 tbody-td-thin-tiny !text-center !border-t-0 super-center">Discapacitados</div>
-                                    @forelse ($record->bathroomComplianceObservations as $key => $controlRecordBathroom)
-                                        <div class="col-span-5 tbody-td-thin-tiny !border-t-0 !border-r-0 super-center !justify-start">{{ $controlRecordBathroom?->bathroomComplianceObservation?->description ?? '-' }}</div>
-                                        <div class="col-span-2 tbody-td-thin-tiny !border-t-0 !border-r-0 !text-center super-center">{{ $controlRecordBathroom->men == 1 ? '✓' : 'X' }}</div>
-                                        <div class="col-span-2 tbody-td-thin-tiny !border-t-0 !border-r-0 !text-center super-center">{{ $controlRecordBathroom->women == 1 ? '✓' : 'X' }}</div>
-                                        <div class="col-span-3 tbody-td-thin-tiny !border-t-0 !text-center super-center">{{ $controlRecordBathroom->disability_person == 1 ? '✓' : 'X' }}</div>
+                                    @forelse ($bathroomComplianceObservations as $key => $bathroomComplianceObservation)
+                                        @php $bathroom = $record->bathroomComplianceObservations->firstWhere('bathroom_compliance_observations_id', '=', $key); @endphp
+                                        <div class="col-span-5 tbody-td-thin-tiny !border-t-0 !border-r-0 super-center !justify-start">{{ $bathroomComplianceObservation }}</div>
+                                        <div class="col-span-2 tbody-td-thin-tiny !border-t-0 !border-r-0 !text-center super-center">{!! ($bathroom->men ?? 0) == 1 ? $checkMark : $wrongMark !!}</div>
+                                        <div class="col-span-2 tbody-td-thin-tiny !border-t-0 !border-r-0 !text-center super-center">{!! ($bathroom->women ?? 0) == 1 ? $checkMark : $wrongMark !!}</div>
+                                        <div class="col-span-3 tbody-td-thin-tiny !border-t-0 !text-center super-center">{!! ($bathroom->disability_person ?? 0) == 1 ? $checkMark : $wrongMark !!}</div>
                                     @empty
                                     @endforelse
                                 </div>
                             </div>
-                            <div class="row-span-2 p-0 col-span-1">
-                                <div class="w-full h-full grid grid-rows-6 grid-cols-12 grid-flow-col">
-                                    <div class="row-span-4 col-span-5 tbody-td !border-t-0 !border-r-0">&nbsp;</div>
+                            <div class="row-span-2 p-0 col-span-3">
+                                <div class="w-full h-full grid grid-rows-6 grid-cols-12 gap-0 grid-flow-col">
+                                    <div class="row-span-4 col-span-5 tbody-td !border-t-0 !border-r-0 super-center">
+                                        @if(! empty($record->creator->signature))
+                                            <img src="{!! $record->creator->signature !!}" alt="">
+                                        @else
+                                            &nbsp;
+                                        @endif
+                                    </div>
                                     <div class="row-span-2 col-span-5 tbody-td !border-t-0 !border-r-0 super-center !text-center">POR {{ $record->company->name ?? '-' }}</div>
-                                    <div class="row-span-4 col-span-7 tbody-td !border-t-0">&nbsp;</div>
+                                    <div class="row-span-4 col-span-7 tbody-td !border-t-0 super-center">
+                                        @if(! empty($record->station->station_manager_signature))
+                                            <img src="{!! $record->station->station_manager_signature !!}" alt="">
+                                        @else
+                                            &nbsp;
+                                        @endif
+                                    </div>
                                     <div class="row-span-2 col-span-7 tbody-td !border-t-0 super-center !text-center">POR ESTACIÓN DE SERVICIO</div>
                                 </div>
                             </div>

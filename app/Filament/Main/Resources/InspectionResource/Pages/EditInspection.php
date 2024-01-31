@@ -17,6 +17,7 @@ use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Colors\Color;
+use Illuminate\Database\Eloquent\Model;
 
 class EditInspection extends EditRecord
 {
@@ -28,6 +29,15 @@ class EditInspection extends EditRecord
         'hosesUpdated',
         'complementaryServicesUpdated',
     ];
+
+    public function getRecord(): Model
+    {
+        return $this->record
+            ->load([
+                'station:id,name',
+                'bathroomComplianceObservations',
+            ]);
+    }
 
     public function afterSave(): void
     {
@@ -84,22 +94,26 @@ class EditInspection extends EditRecord
         ];
     }
 
-    protected function getSaveFormAction(): \Filament\Actions\Action
+    protected function getSaveFormAction(): Action
     {
         return parent::getSaveFormAction()
-            ->disabled(function (): bool {
+            ->disabled(function ($record): bool {
                 if (auth()->user()->isAdmin()) {
                     return false;
                 }
 
-                return ! $this->data['do_not_update'];
+                if ($record->admin_authorization && ! empty($this->data['hose_inspections_completed'])) {
+                    return ! $this->data['hose_inspections_completed'];
+                }
+
+                return ! empty($this->data['do_not_update']) && ! $this->data['do_not_update'];
             });
     }
 
     protected function authorizeAccess(): void
     {
         abort_unless(
-            static::getResource()::canEdit($this->getRecord())
+            InspectionResource::canEdit($this->getRecord())
             || ($this->getRecord()->created_by === auth()->id() && $this->getRecord()->admin_authorization), 403);
     }
 
@@ -135,8 +149,20 @@ class EditInspection extends EditRecord
         return $data;
     }
 
+    protected function getCancelFormAction(): Action
+    {
+        return Action::make('cancel')
+            ->label(__('filament-panels::resources/pages/create-record.form.actions.cancel.label'))
+            ->url(InspectionResource::getUrl())
+            ->color('gray');
+    }
+
     protected function getRedirectUrl(): ?string
     {
+        if (auth()->user()->isAdmin()) {
+            return null;
+        }
+
         return InspectionResource::getUrl();
     }
 }

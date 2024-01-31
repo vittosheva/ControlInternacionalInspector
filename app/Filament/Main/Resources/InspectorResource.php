@@ -22,6 +22,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Saade\FilamentAutograph\Forms\Components\SignaturePad;
 
 class InspectorResource extends Resource
 {
@@ -60,6 +61,15 @@ class InspectorResource extends Resource
                         return false;
                     })
                     ->required(fn ($operation): bool => $operation === 'create')
+                    ->columnSpanFull(),
+                SignaturePad::make('signature')
+                    ->label(__('Signature'))
+                    ->dotSize(2.0)
+                    ->lineMinWidth(0.5)
+                    ->lineMaxWidth(2.5)
+                    ->throttle(16)
+                    ->minDistance(1)
+                    ->velocityFilterWeight(0.7)
                     ->columnSpanFull(),
                 Hidden::make('email_verified_at')
                     ->default(now())
@@ -158,6 +168,6 @@ class InspectorResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Controls');
+        return __('Users');
     }
 }

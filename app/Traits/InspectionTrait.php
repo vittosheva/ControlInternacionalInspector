@@ -148,12 +148,12 @@ trait InspectionTrait
                                 $bathroomComplianceObservations['control_records_id'] = $savedRecord->id;
                                 $bathroomComplianceObservations['bathroom_compliance_observations_id'] = $key;
 
-                                if ($sex == 0) {
-                                    $bathroomComplianceObservations['men'] = $item;
-                                } elseif ($sex == 1) {
-                                    $bathroomComplianceObservations['women'] = $item;
-                                } elseif ($sex == 2) {
-                                    $bathroomComplianceObservations['disability_person'] = $item;
+                                if ($sex == 'men') {
+                                    $bathroomComplianceObservations['men'] = (bool) $item;
+                                } elseif ($sex == 'women') {
+                                    $bathroomComplianceObservations['women'] = (bool) $item;
+                                } elseif ($sex == 'disability_person') {
+                                    $bathroomComplianceObservations['disability_person'] = (bool) $item;
                                 }
                             }
                         }
