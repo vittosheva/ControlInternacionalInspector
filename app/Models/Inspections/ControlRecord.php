@@ -47,6 +47,8 @@ class ControlRecord extends Model implements Auditable
             $record->complementaryServices()->each(fn ($model) => $model->delete());
             $record->environmentalObservations()->each(fn ($model) => $model->delete());
             $record->bathroomComplianceObservations()->each(fn ($model) => $model->delete());
+            $record->measurementTanks()->each(fn ($model) => $model->delete());
+            $record->measurementDrawOuts()->each(fn ($model) => $model->delete());
         });
     }
 
@@ -111,6 +113,16 @@ class ControlRecord extends Model implements Auditable
             ->hasMany(ControlRecordBathroom::class, 'control_records_id')
             ->with('bathroomComplianceObservation')
             ->orderBy('bathroom_compliance_observations_id');
+    }
+
+    public function measurementTanks(): HasMany
+    {
+        return $this->hasMany(ControlRecordMeasurementTank::class, 'control_records_id');
+    }
+
+    public function measurementDrawOuts(): HasMany
+    {
+        return $this->hasMany(ControlRecordMeasurementDrawOut::class, 'control_records_id');
     }
 
     public function complementaryServicesMany(): BelongsToMany

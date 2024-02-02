@@ -20,6 +20,7 @@ use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -28,6 +29,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Saade\FilamentAutograph\Forms\Components\SignaturePad;
 
@@ -59,9 +61,16 @@ trait InspectionFormTrait
 
             Select::make('company_id')
                 ->label(__('Trading Company'))
-                ->options(Company::query()->oldest('name')->pluck('name', 'id')->toArray())
+                ->options(
+                    DB::connection(Company::getModel()->getConnectionName())
+                        ->table(Company::getModel()->getTable())
+                        ->oldest('name')
+                        ->pluck('name', 'id')
+                        ->toArray()
+                )
                 ->afterStateUpdated(function (Set $set, $state, Component $livewire) {
-                    $company = Company::query()
+                    $company = DB::connection(Company::getModel()->getConnectionName())
+                        ->table(Company::getModel()->getTable())
                         ->find($state, [
                             'id',
                             'price_extra',
@@ -85,12 +94,12 @@ trait InspectionFormTrait
                     $livewire->validateOnly('price_eco_plus');
 
                     $livewire->dispatch('clearHoses', [
-                        'company_id' => $company->id,
+                        'company_id' => $state,
                         'station_id' => null,
                     ]);
                 })
                 ->preload()
-                ->searchable()
+                ->searchable(false)
                 ->selectablePlaceholder(false)
                 ->required()
                 ->columnSpan(3),
@@ -102,12 +111,14 @@ trait InspectionFormTrait
                         return [];
                     }
 
-                    $stations = Station::query()
+                    $stations = DB::connection(Station::getModel()->getConnectionName())
+                        ->table(Station::getModel()->getTable())
                         ->where('company_id', '=', $get('company_id'))
                         ->orderBy('name');
 
                     if ($operation === 'create') {
-                        $stationsWithInspectionsInThisYearAndMonth = ControlRecord::query()
+                        $stationsWithInspectionsInThisYearAndMonth = DB::connection(ControlRecord::getModel()->getConnectionName())
+                            ->table(ControlRecord::getModel()->getTable())
                             ->where('year', '=', date('Y'))
                             ->where('month', '=', date('n'))
                             ->where('company_id', '=', $get('company_id'))
@@ -124,16 +135,22 @@ trait InspectionFormTrait
                 ->disableOptionWhen(fn (Get $get) => blank($get('company_id')))
                 ->live(onBlur: true)
                 ->afterStateUpdated(function (Get $get, Set $set, $state, Component $livewire) {
-                    $station = Station::query()
-                        ->with('company:id,price_extra,price_super,price_diesel_1,price_diesel_2,price_eco_plus')
-                        ->find($state, ['id', 'company_id', 'street', 'station_manager_name', 'station_manager_signature']);
+                    $station = DB::connection(Station::getModel()->getConnectionName())
+                        ->table(Station::getModel()->getTable())
+                        ->select([
+                            'stations.id', 'stations.company_id', 'stations.street', 'stations.station_manager_name', 'stations.station_manager_signature',
+                            'companies.price_extra', 'companies.price_super', 'companies.price_diesel_1', 'companies.price_diesel_2', 'companies.price_eco_plus',
+                        ])
+                        ->leftJoin('companies', 'companies.id', '=', 'stations.company_id')
+                        ->where('stations.id', '=', $state)
+                        ->first();
 
                     $set('address', ! empty($station->street) ? $station->street : 'Sin dirección');
 
-                    $set('price_extra', $station->company->price_extra ?? null);
-                    $set('price_super', $station->company->price_super ?? null);
-                    $set('price_diesel_2', $station->company->price_diesel_2 ?? null);
-                    $set('price_eco_plus', $station->company->price_eco_plus ?? null);
+                    $set('price_extra', $station->price_extra ?? null);
+                    $set('price_super', $station->price_super ?? null);
+                    $set('price_diesel_2', $station->price_diesel_2 ?? null);
+                    $set('price_eco_plus', $station->price_eco_plus ?? null);
 
                     $set('station_manager_name', $station->station_manager_name ?? null);
                     $set('station_manager_signature', $station->station_manager_signature ?? null);
@@ -158,11 +175,15 @@ trait InspectionFormTrait
                 ->label(__('Address'))
                 ->afterStateHydrated(function (Get $get, Set $set) {
                     if (! empty($get('station_id'))) {
-                        $street = Station::query()
-                            ->find($get('station_id'), ['id', 'street'])
-                            ->getAttributeValue('street');
+                        $street = DB::connection(Station::getModel()->getConnectionName())
+                            ->table(Station::getModel()->getTable())
+                            ->find($get('station_id'), ['id', 'street']);
 
-                        return $set('address', ! empty($street) ? $street : 'Sin dirección');
+                        if (! empty($street->street)) {
+                            return $street->getAttributeValue('street');
+                        }
+
+                        return $set('address', 'Sin dirección');
                     }
 
                     return null;
@@ -273,7 +294,7 @@ trait InspectionFormTrait
         ];
     }
 
-    protected static function getAdditionalInspections(): array
+    protected static function getObservations(): array
     {
         return [
             Fieldset::make(__('Inspección de servicios complementarios').':')
@@ -305,7 +326,7 @@ trait InspectionFormTrait
                 ])
                 ->columnSpan(3),
             Fieldset::make(__('Observaciones cumplimiento baños').':')
-                ->schema(fn ($record) => [
+                ->schema(fn ($record, $operation) => [
                     View::make('livewire.livewire-render-2')
                         ->viewData([
                             'livewire' => BathroomsPanel::class,
@@ -316,10 +337,72 @@ trait InspectionFormTrait
                                     ->pluck('description', 'id')
                                     ->all(),
                                 'selected' => $record->bathroomComplianceObservations ?? [],
+                                'operation' => $operation,
                             ],
                         ]),
                 ])
                 ->columns(1)
+                ->columnSpan(6),
+        ];
+    }
+
+    protected static function getTanks(): array
+    {
+        return [
+            Fieldset::make(__('Medidas de Tanques').':')
+                ->schema([
+                    Repeater::make('tank_measurements')
+                        ->label('')
+                        ->relationship('measurementTanks')
+                        ->schema([
+                            Select::make('oil')
+                                ->label(__('Combustible'))
+                                ->options(['Super', 'Ecopais', 'Extra', 'Diesel'])
+                                ->preload()
+                                ->searchable(false)
+                                ->required(),
+                            TextInput::make('product')
+                                ->label(__('Producto (cm³)'))
+                                ->default(0)
+                                ->required(),
+                            TextInput::make('water')
+                                ->label(__('Agua (cm³)'))
+                                ->default(0)
+                                ->required(),
+                        ])
+                        ->addActionLabel('+ Añadir')
+                        ->cloneable()
+                        ->collapsible()
+                        ->defaultItems(0)
+                        ->orderColumn('order')
+                        ->columns(3)
+                        ->columnSpanFull(),
+                ])
+                ->columnSpan(6),
+            Fieldset::make(__('Medidas sacadas').':')
+                ->schema([
+                    Repeater::make('measurement_draw_outs')
+                        ->label('')
+                        ->relationship('measurementDrawOuts')
+                        ->schema([
+                            Select::make('oil')
+                                ->label(__('Combustible'))
+                                ->options(['Super', 'Ecopais', 'Extra', 'Diesel'])
+                                ->preload()
+                                ->searchable(false)
+                                ->required(),
+                            TextInput::make('gallons')
+                                ->label(__('Galones'))
+                                ->required(),
+                        ])
+                        ->addActionLabel('+ Añadir')
+                        ->cloneable()
+                        ->collapsible()
+                        ->defaultItems(0)
+                        ->orderColumn('order')
+                        ->columns()
+                        ->columnSpanFull(),
+                ])
                 ->columnSpan(6),
         ];
     }
@@ -349,7 +432,7 @@ trait InspectionFormTrait
                             false => __('No'),
                             null => __('N/A'),
                         ])
-                        ->default(true)
+                        ->default(true),
                 ])
                 ->columns(1)
                 ->columnSpan(3),
@@ -365,7 +448,7 @@ trait InspectionFormTrait
                             'E/S' => 'E/S',
                         ])
                         ->default('CIE')
-                        ->formatStateUsing(fn ($record) => empty($record->responsible_for_calibration_letter) ? 'CIE' : $record->responsible_for_calibration_letter)
+                        ->formatStateUsing(fn ($record) => empty($record->responsible_for_calibration_letter) ? 'CIE' : $record->responsible_for_calibration_letter),
                 ])
                 ->columns(1)
                 ->columnSpan(3),
@@ -375,7 +458,7 @@ trait InspectionFormTrait
                         ->schema([
                             Select::make('created_by')
                                 ->label(__('Inspector 1'))
-                                ->options(User::query()->role('Inspector')->pluck('name', 'id')->toArray())
+                                ->options(User::query()->pluck('name', 'id')->toArray())
                                 ->default(auth()->user()->id)
                                 ->inlineLabel()
                                 ->selectablePlaceholder(false)
@@ -393,7 +476,14 @@ trait InspectionFormTrait
                         $text = 'E/S';
 
                         if ($operation === 'create' && ! empty($get('station_id'))) {
-                            $station = Station::find($get('station_id'), ['id', 'name']);
+                            $station = DB::connection(Station::getModel()->getConnectionName())
+                                ->table(Station::getModel()->getTable())
+                                ->find($get('station_id'), ['id', 'name']);
+
+                            if ($station === null) {
+                                return $text;
+                            }
+
                             return $text.' "'.$station->name.'"';
                         }
 

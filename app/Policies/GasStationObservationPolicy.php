@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use Illuminate\Auth\Access\Response;
 use App\Models\Inspections\GasStationObservation;
 use App\Models\Persona\User;
 

@@ -16,13 +16,15 @@ class BathroomsPanel extends Component implements HasForms
 {
     use InteractsWithForms;
 
+    public ?string $operation;
+
     public ?array $data = [];
 
     public string $relationName = 'bathroom_compliance_observations';
 
     public ?array $bathrooms = [];
 
-    public ?Collection $selected = null;
+    public Collection|array|null $selected = null;
 
     public function mount(): void
     {
@@ -34,11 +36,19 @@ class BathroomsPanel extends Component implements HasForms
         }
 
         for ($bathroom = 1; $bathroom <= count($this->bathrooms); $bathroom++) {
-            $items[$bathroom] = [
-                'men' => (bool) $selected[$bathroom][0] ?? false,
-                'women' => (bool) $selected[$bathroom][1] ?? false,
-                'disability_person' => (bool) $selected[$bathroom][2] ?? false,
-            ];
+            if ($this->operation === 'create') {
+                $items[$bathroom] = [
+                    'men' => true,
+                    'women' => true,
+                    'disability_person' => true,
+                ];
+            } else {
+                $items[$bathroom] = [
+                    'men' => (bool) ($selected[$bathroom][0] ?? false),
+                    'women' => (bool) ($selected[$bathroom][1] ?? false),
+                    'disability_person' => (bool) ($selected[$bathroom][2] ?? false),
+                ];
+            }
         }
 
         $this->data[$this->relationName] = $items;

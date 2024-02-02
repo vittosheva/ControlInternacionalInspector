@@ -142,12 +142,12 @@
                                 <div class="thead-th-inner !border-t-0- !border-r-0 !text-[5pt]">Personas presentes en la inspección</div>
                                 <div class="w-full h-[calc(100%_-_14px)] grid grid-cols-12 gap-0">
                                     <div class="col-span-5 tbody-td-thin-tiny !border-t-0 !border-r-0 !text-center !p-0">
-                                        @if(! empty($record->creator->name) && ! empty($record->additionalInspector->name))
+                                        @if (! empty($record->creator->name) && ! empty($record->additionalInspector->name))
                                         <div class="grid grid-cols-1 grid-rows-2 gap-0 h-full">
                                             <div class="col-span-1 row-span-1 h-full super-center border-b border-black">{{ $record->creator->name }}</div>
                                             <div class="col-span-1 row-span-1 h-full super-center">{{ $record->additionalInspector->name }}</div>
                                         </div>
-                                        @elseif(! empty($record->creator->name) && empty($record->additionalInspector->name))
+                                        @elseif (! empty($record->creator->name) && empty($record->additionalInspector->name))
                                         <div class="grid grid-cols-1 grid-rows-1 gap-0 h-full">
                                             <div class="col-span-1 row-span-1 h-full flex items-center justify-center">{{ $record->creator->name }}</div>
                                         </div>
@@ -248,7 +248,7 @@
                             <div class="row-span-2 p-0 col-span-3">
                                 <div class="w-full h-full grid grid-rows-6 grid-cols-12 gap-0 grid-flow-col">
                                     <div class="row-span-4 col-span-5 tbody-td !border-t-0 !border-r-0 super-center">
-                                        @if(! empty($record->creator->signature))
+                                        @if (! empty($record->creator->signature))
                                             <img src="{!! $record->creator->signature !!}" alt="">
                                         @else
                                             &nbsp;
@@ -256,7 +256,7 @@
                                     </div>
                                     <div class="row-span-2 col-span-5 tbody-td !border-t-0 !border-r-0 super-center !text-center">POR {{ $record->company->name ?? '-' }}</div>
                                     <div class="row-span-4 col-span-7 tbody-td !border-t-0 super-center">
-                                        @if(! empty($record->station->station_manager_signature))
+                                        @if (! empty($record->station->station_manager_signature))
                                             <img src="{!! $record->station->station_manager_signature !!}" alt="">
                                         @else
                                             &nbsp;

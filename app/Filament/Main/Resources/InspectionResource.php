@@ -73,10 +73,10 @@ class InspectionResource extends Resource
                         ->columnSpanFull(),
                     Step::make(__('Inspections'))
                         ->key('inspections')
-                        ->description('Pantalla para las inspecciones')
+                        ->description('Pantalla para inspecciones de mangueras')
                         ->schema([
                             Grid::make()
-                                ->schema(fn ($record, $operation, Get $get) => static::getInspections($record, $get, $operation))
+                                //->schema(fn ($record, $operation, Get $get) => static::getInspections($record, $get, $operation))
                                 ->columns(1),
                         ])
                         ->beforeValidation(function (Get $get) {
@@ -102,7 +102,16 @@ class InspectionResource extends Resource
                         ->description('Pantalla para observaciones complementarias')
                         ->schema([
                             Grid::make()
-                                ->schema(fn () => static::getAdditionalInspections())
+                                //->schema(fn () => static::getObservations())
+                                ->columns(12),
+                        ])
+                        ->columnSpanFull(),
+                    Step::make(__('Tanks'))
+                        ->key('tanks')
+                        ->description('Pantalla para medidas de tanques')
+                        ->schema([
+                            Grid::make()
+                                ->schema(fn () => static::getTanks())
                                 ->columns(12),
                         ])
                         ->columnSpanFull(),
@@ -111,15 +120,15 @@ class InspectionResource extends Resource
                         ->description('Resumen de la inspección')
                         ->schema([
                             Grid::make()
-                                ->schema(fn () => static::getFinalDetails())
+                                //->schema(fn () => static::getFinalDetails())
                                 ->columns(12),
                         ])
                         ->columnSpanFull(),
                 ])
                     ->nextAction(fn (Action $action) => $action->label(fn () => __('Next').' ->')->color(Color::Gray))
                     ->previousAction(fn (Action $action) => $action->label(fn () => '<- '.__('Previous')))
-                    ->startOnStep(3)
-                    ->skippable(fn ($operation) => $operation === 'view')
+                    ->startOnStep(1)
+                    ->skippable(fn ($operation) => in_array($operation, ['edit', 'view']))
                     ->columnSpanFull(),
             ])
             ->columns(12);
