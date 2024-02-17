@@ -1,8 +1,8 @@
 *
 !.gitignore
 !public/
-!"Control Internacional del Ecuador C.A."/
-!"Control Internacional del Ecuador C.A."/*
+!Control\ Internacional\ del\ Ecuador\ C.A./
+!Control\ Internacional\ del\ Ecuador\ C.A./*
 
 # macOS Files
 .DS_Store
