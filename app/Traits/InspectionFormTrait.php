@@ -476,7 +476,7 @@ trait InspectionFormTrait
                                     ->when(! empty($record), function (\Illuminate\Database\Query\Builder $query) use ($record) {
                                         return $query->where('id', '=', $record->created_by);
                                     })
-                                    ->when(empty($record), function (\Illuminate\Database\Query\Builder $query) use ($record) {
+                                    ->when(empty($record), function (\Illuminate\Database\Query\Builder $query) {
                                         return $query->where('id', '=', auth()->id());
                                     })
                                     ->pluck('name', 'id')
@@ -494,7 +494,7 @@ trait InspectionFormTrait
                                     ->when(! empty($record), function (Builder $query) use ($record) {
                                         return $query->where('id', '<>', $record->created_by);
                                     })
-                                    ->when(empty($record), function (Builder $query) use ($record) {
+                                    ->when(empty($record), function (Builder $query) {
                                         return $query->where('id', '<>', auth()->id());
                                     })
                                     ->pluck('name', 'id')
