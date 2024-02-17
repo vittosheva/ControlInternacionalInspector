@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "609081763a68be72f5a3e9023cca2008",
+    "content-hash": "cb680c1c0ad6f0614740a0bd46ddfb97",
     "packages": [
         {
             "name": "althinect/filament-spatie-roles-permissions",
@@ -9423,16 +9423,16 @@
         },
         {
             "name": "spatie/laravel-medialibrary",
-            "version": "11.3.1",
+            "version": "11.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-medialibrary.git",
-                "reference": "f6ec02092a89abb4994f318401ff3e929a1834a9"
+                "reference": "d94b110c2ee9a0602ae1be9bf59e91ae8dab28cf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-medialibrary/zipball/f6ec02092a89abb4994f318401ff3e929a1834a9",
-                "reference": "f6ec02092a89abb4994f318401ff3e929a1834a9",
+                "url": "https://api.github.com/repos/spatie/laravel-medialibrary/zipball/d94b110c2ee9a0602ae1be9bf59e91ae8dab28cf",
+                "reference": "d94b110c2ee9a0602ae1be9bf59e91ae8dab28cf",
                 "shasum": ""
             },
             "require": {
@@ -9515,7 +9515,7 @@
             ],
             "support": {
                 "issues": "https://github.com/spatie/laravel-medialibrary/issues",
-                "source": "https://github.com/spatie/laravel-medialibrary/tree/11.3.1"
+                "source": "https://github.com/spatie/laravel-medialibrary/tree/11.4.1"
             },
             "funding": [
                 {
@@ -9527,7 +9527,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-02-16T10:30:20+00:00"
+            "time": "2024-02-17T12:22:37+00:00"
         },
         {
             "name": "spatie/laravel-package-tools",
