@@ -162,46 +162,22 @@
                                 <div class="thead-th-inner !border-t-0 !border-r-0 !text-[5pt]">MEDIDAS DE TANQUES</div>
                                 <div class="w-full h-[calc(100%_-_12px)] grid grid-cols-12 gap-0">
                                     <div class="col-span-3 tbody-td !border-0 !border-b !border-l"></div>
-                                    <div class="col-span-5 tbody-td-thin !text-center !border-t-0 !border-r-0">PROOT.</div>
-                                    <div class="col-span-4 tbody-td-thin !text-center !border-t-0 !border-r-0">AGUA</div>
-
-                                    <div class="col-span-3 tbody-td-thin !text-center !border-0 !border-b !border-l">SUPER</div>
-                                    <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
-                                    <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
-                                    <div class="col-span-3 tbody-td-thin !text-center !border-0 !border-b !border-l">SUPER</div>
-                                    <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
-                                    <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
-
-                                    <div class="col-span-3 tbody-td-thin !text-center !border-0 !border-b !border-l">ECOPAIS</div>
-                                    <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
-                                    <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
-                                    <div class="col-span-3 tbody-td-thin !text-center !border-0 !border-b !border-l">ECOPAIS</div>
-                                    <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
-                                    <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
-                                    <div class="col-span-3 tbody-td-thin !text-center !border-0 !border-b !border-l">ECOPAIS</div>
-                                    <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
-                                    <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
-
-                                    <div class="col-span-3 tbody-td-thin !text-center !border-0 !border-b !border-l">DIESEL P.</div>
-                                    <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
-                                    <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
-                                    <div class="col-span-3 tbody-td-thin !text-center !border-0 !border-b !border-l">DIESEL P.</div>
-                                    <div class="col-span-5 tbody-td !border-t-0 !border-r-0">47cmm</div>
-                                    <div class="col-span-4 tbody-td !border-t-0 !border-r-0">0cm</div>
+                                    <div class="col-span-5 tbody-td-thin !text-center !border-t-0 !border-r-0 super-center">PROOT.</div>
+                                    <div class="col-span-4 tbody-td-thin !text-center !border-t-0 !border-r-0 super-center">AGUA</div>
+                                    @foreach($record->measurementTanks as $measurementTank)
+                                        <div class="col-span-3 tbody-td-thin !text-center !border-0 !border-b !border-l super-center">{{ $measurementTank->oil }}</div>
+                                        <div class="col-span-5 tbody-td !border-t-0 !border-r-0 super-center">{{ $measurementTank->product }}c&#13221;</div>
+                                        <div class="col-span-4 tbody-td !border-t-0 !border-r-0 super-center">{{ $measurementTank->water }}c&#13221;</div>
+                                    @endforeach
                                 </div>
                             </div>
                             <div class="row-span-2 p-0 col-span-2">
                                 <div class="tbody-td !border-t-0 !border-r-0">MEDIDAS SACADAS</div>
                                 <div class="w-full h-[calc(100%_-_12px)] grid grid-cols-12 gap-0">
-                                    <div class="col-span-3 tbody-td-thin !border-0 !border-b !border-l super-center">SUPER</div>
-                                    <div class="col-span-8 tbody-td-thin !border-0 !border-b !border-l super-center">X</div>
-                                    <div class="col-span-1 tbody-td-thin !border-0 !border-b super-center">gal</div>
-                                    <div class="col-span-3 tbody-td-thin !border-0 !border-b !border-l super-center">ECOPAIS</div>
-                                    <div class="col-span-8 tbody-td-thin !border-0 !border-b !border-l super-center">X</div>
-                                    <div class="col-span-1 tbody-td-thin !border-0 !border-b super-center">gal</div>
-                                    <div class="col-span-3 tbody-td-thin !border-0 !border-b !border-l super-center">DIESEL P.</div>
-                                    <div class="col-span-8 tbody-td-thin !border-0 !border-b !border-l super-center">X</div>
-                                    <div class="col-span-1 tbody-td-thin !border-0 !border-b super-center">gal</div>
+                                    @foreach($record->measurementDrawOuts as $measurementDrawOut)
+                                        <div class="col-span-3 tbody-td-thin !border-0 !border-b !border-l super-center">{{ $measurementDrawOut->oil }}</div>
+                                        <div class="col-span-9 tbody-td-thin !border-0 !border-b !border-l super-center">{{ $measurementDrawOut->gallons }}gal</div>
+                                    @endforeach
                                 </div>
                             </div>
                             <div class="row-span-1 p-0 col-span-8">

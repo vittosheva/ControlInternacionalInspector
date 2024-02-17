@@ -2,15 +2,12 @@
 
 namespace App\Providers\Filament;
 
-use Althinect\FilamentSpatieRolesPermissions\Middleware\SyncSpatiePermissionsWithFilamentTenants;
 use App\Filament\Main\Pages\Auth\Login;
 use App\Filament\Main\Pages\Dashboard;
 use App\Filament\Main\Resources\InspectionResource;
-use App\Http\Middleware\DocumentPrefixes;
-use App\Http\Middleware\FilamentAssets;
 use App\Http\Middleware\HtmlMinifier;
-use App\Models\Core\Company;
 use Awcodes\FilamentQuickCreate\QuickCreatePlugin;
+use Exception;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -34,6 +31,9 @@ use lockscreen\FilamentLockscreen\Lockscreen;
 
 class MainPanelProvider extends PanelProvider
 {
+    /**
+     * @throws Exception
+     */
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -66,25 +66,10 @@ class MainPanelProvider extends PanelProvider
                 Authenticate::class,
                 Locker::class,
             ])
-            /*->tenant(Company::class, 'ruc', 'company')
-            ->tenantRegistration(null)
-            ->tenantMenu(fn () => filament()->getCurrentPanel()->isDefault() && auth()->user()->isAdmin())
-            ->tenantMenuItems([
-                //
-            ])
-            ->tenantRoutePrefix(null)
-            ->tenantRoutes(function () {
-                //
-            })
-            ->tenantMiddleware([
-                SyncSpatiePermissionsWithFilamentTenants::class,
-                FilamentAssets::class,
-                DocumentPrefixes::class,
-            ], true)*/
             ->spa(config('dorsi.filament.spa'))
             ->sidebarWidth('17rem')
-            //->sidebarCollapsibleOnDesktop()
-            ->sidebarFullyCollapsibleOnDesktop()
+            ->sidebarCollapsibleOnDesktop()
+            //->sidebarFullyCollapsibleOnDesktop()
             ->collapsibleNavigationGroups()
             ->darkMode(false)
             ->maxContentWidth(MaxWidth::Full)

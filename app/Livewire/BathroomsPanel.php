@@ -8,10 +8,8 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Application;
-use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
-#[Lazy]
 class BathroomsPanel extends Component implements HasForms
 {
     use InteractsWithForms;

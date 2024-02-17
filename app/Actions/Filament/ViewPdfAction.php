@@ -5,6 +5,7 @@ namespace App\Actions\Filament;
 use Filament\Actions\Action;
 use Filament\Support\Colors\Color;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Jenssegers\Optimus\Optimus;
 
 class ViewPdfAction extends Action
@@ -27,6 +28,7 @@ class ViewPdfAction extends Action
                 'record' => $optimus->encode($record->getAttributeValue('id')),
             ]),
                 shouldOpenInNewTab: true
-            );
+            )
+            ->visible(fn ($record) => ! empty($record->inspection_report_pdf) && Storage::disk('inspections_pdf')->exists($record->inspection_report_pdf));
     }
 }

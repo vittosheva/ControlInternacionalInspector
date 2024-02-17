@@ -68,6 +68,7 @@ trait InspectionFormTrait
                         ->pluck('name', 'id')
                         ->toArray()
                 )
+                ->live(onBlur: true)
                 ->afterStateUpdated(function (Set $set, $state, Component $livewire) {
                     $company = DB::connection(Company::getModel()->getConnectionName())
                         ->table(Company::getModel()->getTable())
@@ -113,27 +114,28 @@ trait InspectionFormTrait
 
                     $stations = DB::connection(Station::getModel()->getConnectionName())
                         ->table(Station::getModel()->getTable())
-                        ->where('company_id', '=', $get('company_id'))
-                        ->orderBy('name');
+                        ->where('company_id', '=', $get('company_id'));
 
                     if ($operation === 'create') {
-                        $stationsWithInspectionsInThisYearAndMonth = DB::connection(ControlRecord::getModel()->getConnectionName())
-                            ->table(ControlRecord::getModel()->getTable())
-                            ->where('year', '=', date('Y'))
-                            ->where('month', '=', date('n'))
-                            ->where('company_id', '=', $get('company_id'))
-                            ->pluck('station_id')
-                            ->toArray();
-
-                        $stations = $stations->whereNotIn('id', $stationsWithInspectionsInThisYearAndMonth);
+                        $stations = $stations
+                            ->whereNotIn('id', function (\Illuminate\Database\Query\Builder $query) use ($get) {
+                                $query
+                                    ->select('station_id')
+                                    ->from(ControlRecord::getModel()->getTable())
+                                    ->where('year', '=', date('Y'))
+                                    ->where('month', '=', date('n'))
+                                    ->where('company_id', '=', $get('company_id'));
+                            });
                     }
 
                     return $stations
+                        ->orderBy('name')
+                        ->distinct()
                         ->pluck('name', 'id')
                         ->toArray();
                 })
-                ->disableOptionWhen(fn (Get $get) => blank($get('company_id')))
                 ->live(onBlur: true)
+                ->disableOptionWhen(fn (Get $get) => blank($get('company_id')))
                 ->afterStateUpdated(function (Get $get, Set $set, $state, Component $livewire) {
                     $station = DB::connection(Station::getModel()->getConnectionName())
                         ->table(Station::getModel()->getTable())
@@ -145,7 +147,7 @@ trait InspectionFormTrait
                         ->where('stations.id', '=', $state)
                         ->first();
 
-                    $set('address', ! empty($station->street) ? $station->street : 'Sin dirección');
+                    $set('address', $station->street ?? 'Sin dirección');
 
                     $set('price_extra', $station->price_extra ?? null);
                     $set('price_super', $station->price_super ?? null);
@@ -162,7 +164,7 @@ trait InspectionFormTrait
 
                     $livewire->dispatch('clearHoses', [
                         'company_id' => $get('company_id'),
-                        'station_id' => $station->id,
+                        'station_id' => $state,
                     ]);
                 })
                 ->preload()
@@ -238,9 +240,9 @@ trait InspectionFormTrait
                         'record' => $record,
                     ],
                 ])
-                ->visible(fn ($operation) => $operation !== 'create'),
+                ->visible(fn ($operation) => $operation === 'view'),
             HrPlaceholder::make('')
-                ->visible(fn ($operation) => $operation !== 'create'),
+                ->visible(fn ($operation) => $operation === 'view'),
             Grid::make()
                 ->schema([
                     Checkbox::make('do_not_update')
@@ -255,7 +257,7 @@ trait InspectionFormTrait
                 ->visible(fn ($operation) => $operation === 'edit')
                 ->columns(1),
             HrPlaceholder::make('')
-                ->visible(fn ($operation) => $operation !== 'create'),
+                ->visible(fn ($operation) => $operation === 'edit'),
             Livewire::make(HosesPanel::class, [
                 'operation' => $operation,
                 'companyId' => $get('company_id'),
@@ -294,58 +296,6 @@ trait InspectionFormTrait
         ];
     }
 
-    protected static function getObservations(): array
-    {
-        return [
-            Fieldset::make(__('Inspección de servicios complementarios').':')
-                ->schema([
-                    CheckboxList::make('complementary_services')
-                        ->label('')
-                        ->relationship(
-                            'complementaryServicesMany',
-                            'description',
-                            fn (Builder $query) => $query->orderBy('code')
-                        )
-                        ->visible(fn (Get $get, $operation) => auth()->user()->isAdmin() || $operation === 'view' || ! empty($get('hose_inspections_completed')))
-                        ->required()
-                        ->columnSpanFull(),
-                ])
-                ->columnSpan(3),
-            Fieldset::make(__('Observaciones ambientales').':')
-                ->schema([
-                    CheckboxList::make('environmental_observations')
-                        ->label('')
-                        ->relationship(
-                            'environmentalObservationsMany',
-                            'description',
-                            fn (Builder $query) => $query->orderBy('code')
-                        )
-                        ->visible(fn (Get $get, $operation) => auth()->user()->isAdmin() || $operation === 'view' || ! empty($get('hose_inspections_completed')))
-                        ->required()
-                        ->columnSpanFull(),
-                ])
-                ->columnSpan(3),
-            Fieldset::make(__('Observaciones cumplimiento baños').':')
-                ->schema(fn ($record, $operation) => [
-                    View::make('livewire.livewire-render-2')
-                        ->viewData([
-                            'livewire' => BathroomsPanel::class,
-                            'params' => [
-                                'relationName' => 'bathroom_compliance_observations',
-                                'bathrooms' => BathroomComplianceObservation::query()
-                                    ->orderBy('code')
-                                    ->pluck('description', 'id')
-                                    ->all(),
-                                'selected' => $record->bathroomComplianceObservations ?? [],
-                                'operation' => $operation,
-                            ],
-                        ]),
-                ])
-                ->columns(1)
-                ->columnSpan(6),
-        ];
-    }
-
     protected static function getTanks(): array
     {
         return [
@@ -357,7 +307,12 @@ trait InspectionFormTrait
                         ->schema([
                             Select::make('oil')
                                 ->label(__('Combustible'))
-                                ->options(['Super', 'Ecopais', 'Extra', 'Diesel'])
+                                ->options([
+                                    'Super' => 'Super',
+                                    'Ecopais' => 'Ecopais',
+                                    'Extra' => 'Extra',
+                                    'Diesel' => 'Diesel',
+                                ])
                                 ->preload()
                                 ->searchable(false)
                                 ->required(),
@@ -372,7 +327,7 @@ trait InspectionFormTrait
                         ])
                         ->addActionLabel('+ Añadir')
                         ->cloneable()
-                        ->collapsible()
+                        ->collapsible(false)
                         ->defaultItems(0)
                         ->orderColumn('order')
                         ->columns(3)
@@ -387,22 +342,81 @@ trait InspectionFormTrait
                         ->schema([
                             Select::make('oil')
                                 ->label(__('Combustible'))
-                                ->options(['Super', 'Ecopais', 'Extra', 'Diesel'])
+                                ->options([
+                                    'Super' => 'Super',
+                                    'Ecopais' => 'Ecopais',
+                                    'Extra' => 'Extra',
+                                    'Diesel' => 'Diesel',
+                                ])
                                 ->preload()
                                 ->searchable(false)
                                 ->required(),
                             TextInput::make('gallons')
                                 ->label(__('Galones'))
+                                ->default(0)
                                 ->required(),
                         ])
                         ->addActionLabel('+ Añadir')
                         ->cloneable()
-                        ->collapsible()
+                        ->collapsible(false)
                         ->defaultItems(0)
                         ->orderColumn('order')
                         ->columns()
                         ->columnSpanFull(),
                 ])
+                ->columnSpan(6),
+        ];
+    }
+
+    protected static function getObservations(): array
+    {
+        return [
+            Fieldset::make(__('Inspección de servicios complementarios').':')
+                ->schema([
+                    CheckboxList::make('complementary_services')
+                        ->label('')
+                        ->relationship(
+                            'complementaryServicesMany',
+                            'description',
+                            fn (Builder $query) => $query->orderBy('code')
+                        )
+                        ->visible(fn (Get $get, $operation) => $operation === 'view' || auth()->user()->isAdmin() || ! empty($get('hose_inspections_completed')))
+                        ->required()
+                        ->columnSpanFull(),
+                ])
+                ->columnSpan(3),
+            Fieldset::make(__('Observaciones ambientales').':')
+                ->schema([
+                    CheckboxList::make('environmental_observations')
+                        ->label('')
+                        ->relationship(
+                            'environmentalObservationsMany',
+                            'description',
+                            fn (Builder $query) => $query->orderBy('code')
+                        )
+                        ->visible(fn (Get $get, $operation) => $operation === 'view' || auth()->user()->isAdmin() || ! empty($get('hose_inspections_completed')))
+                        ->required()
+                        ->columnSpanFull(),
+                ])
+                ->columnSpan(3),
+            Fieldset::make(__('Observaciones cumplimiento baños').':')
+                ->schema(fn ($record, $operation) => [
+                    View::make('livewire.livewire-render-2')
+                        ->viewData([
+                            'livewire' => BathroomsPanel::class,
+                            'params' => [
+                                'relationName' => 'bathroom_compliance_observations',
+                                'bathrooms' => DB::connection(BathroomComplianceObservation::getModel()->getConnectionName())
+                                    ->table(BathroomComplianceObservation::getModel()->getTable())
+                                    ->orderBy('code')
+                                    ->pluck('description', 'id')
+                                    ->all(),
+                                'selected' => $record->bathroomComplianceObservations->isNotEmpty() ? $record->bathroomComplianceObservations : [],
+                                'operation' => $operation,
+                            ],
+                        ]),
+                ])
+                ->columns(1)
                 ->columnSpan(6),
         ];
     }
@@ -458,7 +472,15 @@ trait InspectionFormTrait
                         ->schema([
                             Select::make('created_by')
                                 ->label(__('Inspector 1'))
-                                ->options(User::query()->pluck('name', 'id')->toArray())
+                                ->options(fn ($record) => DB::table(User::getModel()->getTable())
+                                    ->when(! empty($record), function (\Illuminate\Database\Query\Builder $query) use ($record) {
+                                        return $query->where('id', '=', $record->created_by);
+                                    })
+                                    ->when(empty($record), function (\Illuminate\Database\Query\Builder $query) use ($record) {
+                                        return $query->where('id', '=', auth()->id());
+                                    })
+                                    ->pluck('name', 'id')
+                                    ->toArray())
                                 ->default(auth()->user()->id)
                                 ->inlineLabel()
                                 ->selectablePlaceholder(false)
@@ -466,7 +488,17 @@ trait InspectionFormTrait
 
                             Select::make('inspector_name_2')
                                 ->label(__('Inspector 2'))
-                                ->options(User::query()->role('Inspector')->where('id', '<>', auth()->id())->pluck('name', 'id')->toArray())
+                                ->options(fn ($record) => User::query()
+                                    ->role('Inspector')
+                                    ->withoutRole('Administrador')
+                                    ->when(! empty($record), function (Builder $query) use ($record) {
+                                        return $query->where('id', '<>', $record->created_by);
+                                    })
+                                    ->when(empty($record), function (Builder $query) use ($record) {
+                                        return $query->where('id', '<>', auth()->id());
+                                    })
+                                    ->pluck('name', 'id')
+                                    ->toArray())
                                 ->default(null)
                                 ->inlineLabel(),
                         ])
@@ -519,7 +551,7 @@ trait InspectionFormTrait
                         ->label(__('Notes'))
                         ->columnSpan('full'),
                 ])
-                ->collapsed()
+                ->collapsed(false)
                 ->collapsible()
                 ->columnSpanFull(),
         ];

@@ -1,6 +1,7 @@
 <?php
 
 // @formatter:off
+// phpcs:ignoreFile
 /**
  * A helper file for your Eloquent Models
  * Copy the phpDocs from this file to the correct Model,
@@ -555,6 +556,7 @@ namespace App\Models\Inspections{
  * @property int|null $updated_by Related User in Inspector database (not local users tables)
  * @property string|null $inspection_report_pdf
  * @property bool|null $admin_authorization
+ * @property-read \App\Models\Persona\User|null $additionalInspector
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \OwenIt\Auditing\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Inspections\ControlRecordBathroom> $bathroomComplianceObservations
@@ -576,6 +578,10 @@ namespace App\Models\Inspections{
  * @property-read int|null $environmental_observations_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Inspections\EnvironmentalObservation> $environmentalObservationsMany
  * @property-read int|null $environmental_observations_many_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Inspections\ControlRecordMeasurementDrawOut> $measurementDrawOuts
+ * @property-read int|null $measurement_draw_outs_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Inspections\ControlRecordMeasurementTank> $measurementTanks
+ * @property-read int|null $measurement_tanks_count
  * @property-read \App\Models\Inspections\Station $station
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecord newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecord newQuery()
@@ -741,6 +747,62 @@ namespace App\Models\Inspections{
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordEnvironmental whereUpdatedAt($value)
  */
 	class ControlRecordEnvironmental extends \Eloquent implements \OwenIt\Auditing\Contracts\Auditable {}
+}
+
+namespace App\Models\Inspections{
+/**
+ * App\Models\Inspections\ControlRecordMeasurementDrawOut
+ *
+ * @property int $id
+ * @property int $control_records_id
+ * @property string $oil
+ * @property int $gallons
+ * @property int|null $order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \OwenIt\Auditing\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementDrawOut newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementDrawOut newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementDrawOut query()
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementDrawOut whereControlRecordsId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementDrawOut whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementDrawOut whereGallons($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementDrawOut whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementDrawOut whereOil($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementDrawOut whereOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementDrawOut whereUpdatedAt($value)
+ */
+	class ControlRecordMeasurementDrawOut extends \Eloquent implements \OwenIt\Auditing\Contracts\Auditable {}
+}
+
+namespace App\Models\Inspections{
+/**
+ * App\Models\Inspections\ControlRecordMeasurementTank
+ *
+ * @property int $id
+ * @property int $control_records_id
+ * @property string $oil
+ * @property int $product
+ * @property int|null $water
+ * @property int|null $order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \OwenIt\Auditing\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementTank newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementTank newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementTank query()
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementTank whereControlRecordsId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementTank whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementTank whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementTank whereOil($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementTank whereOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementTank whereProduct($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementTank whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordMeasurementTank whereWater($value)
+ */
+	class ControlRecordMeasurementTank extends \Eloquent implements \OwenIt\Auditing\Contracts\Auditable {}
 }
 
 namespace App\Models\Inspections{

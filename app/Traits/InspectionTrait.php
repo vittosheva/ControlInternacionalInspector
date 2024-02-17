@@ -41,9 +41,9 @@ trait InspectionTrait
             return;
         }
 
-        if (empty($this->data['do_not_update']) || $this->data['do_not_update']) {
+        /*if (empty($this->data['do_not_update']) || $this->data['do_not_update']) {
             $this->halt();
-        }
+        }*/
 
         if (
             empty($this->dataHoses)

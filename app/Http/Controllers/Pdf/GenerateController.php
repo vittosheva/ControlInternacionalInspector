@@ -45,6 +45,8 @@ class GenerateController extends Controller
                 'bathroomComplianceObservations',
                 'creator:id,name,signature',
                 'additionalInspector:id,name',
+                'measurementTanks',
+                'measurementDrawOuts',
             ])
             ->find($this->optimus->decode($record));
 
@@ -60,7 +62,7 @@ class GenerateController extends Controller
             'complementaryServices' => ComplementaryService::all()->pluck('description', 'id')->all(),
             'environmentalObservations' => EnvironmentalObservation::all()->pluck('description', 'id')->all(),
             'bathroomComplianceObservations' => BathroomComplianceObservation::all()->pluck('description', 'id')->all(),
-            'checkMark' => '✓',
+            'checkMark' => '✓', // ✓ |
             'wrongMark' => '-',
         ];
 
