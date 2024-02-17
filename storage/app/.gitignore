@@ -1,9 +1,8 @@
 *
 !.gitignore
-!DorsiSoft/
-!DorsiSoft/*
-!comprobantes/
 !public/
+!"Control Internacional del Ecuador C.A."/
+!"Control Internacional del Ecuador C.A."/*
 
 # macOS Files
 .DS_Store

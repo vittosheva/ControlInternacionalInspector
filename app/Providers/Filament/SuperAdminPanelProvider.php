@@ -6,6 +6,7 @@ use App\Filament\SuperAdmin\Pages\Auth\Login;
 use App\Filament\SuperAdmin\Pages\Backups;
 use App\Filament\SuperAdmin\Pages\Dashboard;
 use CmsMulti\FilamentClearCache\FilamentClearCachePlugin;
+use Exception;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -34,6 +35,9 @@ use Tapp\FilamentAuthenticationLog\FilamentAuthenticationLogPlugin;
 
 class SuperAdminPanelProvider extends PanelProvider
 {
+    /**
+     * @throws Exception
+     */
     public function panel(Panel $panel): Panel
     {
         return $panel
