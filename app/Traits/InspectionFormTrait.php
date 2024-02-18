@@ -240,9 +240,9 @@ trait InspectionFormTrait
                         'record' => $record,
                     ],
                 ])
-                ->visible(fn ($operation) => $operation === 'view'),
+                ->visible(fn ($operation) => $operation === 'view' || auth()->user()->isAdmin()),
             HrPlaceholder::make('')
-                ->visible(fn ($operation) => $operation === 'view'),
+                ->visible(fn ($operation) => $operation === 'view' && auth()->user()->isAdmin()),
             Grid::make()
                 ->schema([
                     Checkbox::make('do_not_update')
@@ -264,7 +264,7 @@ trait InspectionFormTrait
                 'stationId' => $get('station_id'),
             ])
                 ->visible(function (Get $get, $operation) {
-                    if (auth()->user()->isAdmin()) {
+                    if (auth()->user()->isAdmin() && ! $get('do_not_update')) {
                         return true;
                     }
 
@@ -410,8 +410,8 @@ trait InspectionFormTrait
                                     ->table(BathroomComplianceObservation::getModel()->getTable())
                                     ->orderBy('code')
                                     ->pluck('description', 'id')
-                                    ->all(),
-                                'selected' => $record->bathroomComplianceObservations->isNotEmpty() ? $record->bathroomComplianceObservations : [],
+                                    ->toArray(),
+                                'selected' => ! empty($record->bathroomComplianceObservations) && $record->bathroomComplianceObservations->isNotEmpty() ? $record->bathroomComplianceObservations : [],
                                 'operation' => $operation,
                             ],
                         ]),
@@ -528,7 +528,10 @@ trait InspectionFormTrait
                         ->relationship('station')
                         ->schema([
                             TextInput::make('station_manager_name')
-                                ->label(__('Name')),
+                                ->label(__('Name'))
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(fn (Component $livewire, TextInput $component) => $livewire->validateOnly($component->getStatePath()))
+                                ->required(),
                             SignaturePad::make('station_manager_signature')
                                 ->label(__('Signature'))
                                 ->dotSize(2.0)
@@ -536,7 +539,10 @@ trait InspectionFormTrait
                                 ->lineMaxWidth(2.5)
                                 ->throttle(16)
                                 ->minDistance(1)
-                                ->velocityFilterWeight(0.7),
+                                ->velocityFilterWeight(0.7)
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(fn (Component $livewire, SignaturePad $component) => $livewire->validateOnly($component->getStatePath()))
+                                ->required(),
                         ])
                         ->columns(1)
                         ->columnSpan(7),
@@ -549,6 +555,9 @@ trait InspectionFormTrait
                 ->schema([
                     MarkdownEditor::make('inspector_notes')
                         ->label(__('Notes'))
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(fn (Component $livewire, MarkdownEditor $component) => $livewire->validateOnly($component->getStatePath()))
+                        ->required()
                         ->columnSpan('full'),
                 ])
                 ->collapsed(false)

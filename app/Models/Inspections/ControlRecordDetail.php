@@ -18,7 +18,11 @@ class ControlRecordDetail extends Model implements Auditable
     protected $fillable = [
         'control_record_id', 'hose_id', 'seal_found', 'seal_left', 'quantity', 'observations', 'company_observations',
         'measurement_id', 'measurement_id_sec_1', 'measurement_id_sec_2', 'observation_id', 'company_observation_id',
-        'letter_responsable_id', 'letter_observations', 'letter_seal', 'totalizator', 'octane',
+        'letter_responsable_id', 'letter_observations', 'letter_seal', 'totalizator', 'octane', 'measurements_array',
+    ];
+
+    protected $casts = [
+        'measurements_array' => 'array',
     ];
 
     public function controlRecord(): BelongsTo

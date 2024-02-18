@@ -98,7 +98,7 @@
                     <td class="tbody-td">{{ $item->observation->name ?? '-' }}</td>
                     <td class="tbody-td">{{ $item->totalizator ?? '-' }}</td>
                     <td class="tbody-td">{{ $item->measurement->name ?? '-' }}</td>
-                    <td class="tbody-td">{{ $item->measurement2->name ?? '-' }}</td>
+                    <td class="tbody-td">{{ $item->measurements_array ?? '-' }}</td>
                     <td class="tbody-td">{{ $item->observationCompany->name ?? '-' }}</td>
                     @php if(empty($item->observation->name) || $item->observation->name == '') { $badHoses = $badHoses + 1; } @endphp
                 </tr>
@@ -162,7 +162,7 @@
                                 <div class="thead-th-inner !border-t-0 !border-r-0 !text-[5pt]">MEDIDAS DE TANQUES</div>
                                 <div class="w-full h-[calc(100%_-_12px)] grid grid-cols-12 gap-0">
                                     <div class="col-span-3 tbody-td !border-0 !border-b !border-l"></div>
-                                    <div class="col-span-5 tbody-td-thin !text-center !border-t-0 !border-r-0 super-center">PROOT.</div>
+                                    <div class="col-span-5 tbody-td-thin !text-center !border-t-0 !border-r-0 super-center">PRODUCTO</div>
                                     <div class="col-span-4 tbody-td-thin !text-center !border-t-0 !border-r-0 super-center">AGUA</div>
                                     @foreach($record->measurementTanks as $measurementTank)
                                         <div class="col-span-3 tbody-td-thin !text-center !border-0 !border-b !border-l super-center">{{ $measurementTank->oil }}</div>

@@ -12,6 +12,7 @@ use App\Models\Inspections\Observation;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -193,7 +194,7 @@ class HosesPanel extends Component implements HasForms
                             ->afterStateUpdated(function (Component $livewire, TextInput $component, Get $get, Set $set) {
                                 $livewire->validateOnly($component->getStatePath());
 
-                                if (empty($this->selectedHose) || $get('observation_id') == 4) {
+                                if (empty($this->selectedHose)) {
                                     $set('quantity', 0);
                                 }
                             })
@@ -218,7 +219,7 @@ class HosesPanel extends Component implements HasForms
                             ->afterStateUpdated(function (Component $livewire, TextInput $component, Get $get, Set $set) {
                                 $livewire->validateOnly($component->getStatePath());
 
-                                if (empty($this->selectedHose) || $get('observation_id') == 4) {
+                                if (empty($this->selectedHose)) {
                                     $set('octane', 0);
                                 }
                             })
@@ -232,6 +233,9 @@ class HosesPanel extends Component implements HasForms
                             })
                             ->columnSpan(3),
 
+                        HrPlaceholder::make('')
+                            ->extraAttributes(['class' => 'pt-4']),
+
                         TextInput::make('totalizator')
                             ->label(__('Totalizator'))
                             ->live(onBlur: true)
@@ -243,8 +247,7 @@ class HosesPanel extends Component implements HasForms
                             ->disabled(fn () => empty($this->selectedHose))
                             ->required()
                             ->extraInputAttributes(['class' => 'text-right'])
-                            ->columnSpan(3)
-                            ->columnStart(1),
+                            ->columnSpan(3),
                         Select::make('measurement_id')
                             ->label(__('Medida anterior'))
                             ->options(fn () => $this->measurements)
@@ -259,28 +262,26 @@ class HosesPanel extends Component implements HasForms
                                 return $component->state($state);
                             })
                             ->columnSpan(3),
-                        Select::make('measurement_id_sec_1')
-                            ->label(__('Medida actual'))
-                            ->options(fn () => $this->measurements)
-                            ->preload()
-                            ->live()
-                            ->afterStateHydrated(function (Select $component, ?string $state) {
-                                if (! empty($this->selectedHose) && empty($state)) {
-                                    return $component->state(7);
-                                }
-
-                                return $component->state($state);
-                            })
-                            ->default(0)
-                            ->disableOptionWhen(fn () => empty($this->selectedHose))
-                            ->required(function ($state, $operation) {
-                                if (auth()->user()->isAdmin()) {
-                                    return false;
-                                }
-
-                                return $state == false || $operation === 'create';
-                            })
-                            ->columnSpan(3),
+                        Fieldset::make(__('Medidas actuales').':')
+                            ->schema([
+                                Repeater::make('measurements_array')
+                                    ->label('')
+                                    ->simple(
+                                        Select::make('measurement_id')
+                                            ->label(__('Medida anterior'))
+                                            ->options(fn () => $this->measurements)
+                                            ->default(7)
+                                            ->live(onBlur: true)
+                                            ->required()
+                                            ->columnSpanFull(),
+                                    )
+                                    ->addActionLabel(__('Append'))
+                                    ->required()
+                                    ->columnSpanFull(),
+                            ])
+                            ->disabled(fn () => empty($this->selectedHose))
+                            ->columns(12)
+                            ->columnSpan(6),
 
                         HrPlaceholder::make('')
                             ->extraAttributes(['class' => 'pt-4']),
@@ -392,6 +393,7 @@ class HosesPanel extends Component implements HasForms
                 'company_observations',
                 'measurement_id_sec_1',
                 'measurement_id_sec_2',
+                'measurements_array',
                 'totalizator',
             ]) + [
                 'hose' => $selected->hose->name,
@@ -407,9 +409,13 @@ class HosesPanel extends Component implements HasForms
 
     public function addControl(): void
     {
+        $form = $this->form->getState();
+
+        $form['measurements_array'] = collect($form['measurements_array'])->flatten()->toArray();
+
         $this->dataCollection->put(
             $this->hoses->firstWhere('id', '=', $this->selectedHose)->name,
-            $this->form->getState()
+            $form
         );
 
         Notification::make()
@@ -451,7 +457,7 @@ class HosesPanel extends Component implements HasForms
 
     protected function getControlRecordFromDatabase(bool $subtract = true): Model|Builder|null
     {
-        return ControlRecord::query()
+        $record = ControlRecord::query()
             ->with([
                 'details' => [
                     'hose',
@@ -465,6 +471,20 @@ class HosesPanel extends Component implements HasForms
             ->where('month', '=', $subtract ? now()->subMonth()->format('n') : now()->format('n'))
             ->latest('inspection_date')
             ->first();
+
+        if (! empty($record->details) && $record->details->isNotEmpty()) {
+            $record->details->map(function ($detail) {
+                if (! empty($detail->measurements_array) && is_array($detail->measurements_array)) {
+                    $detail->measurements_array = Measurement::query()
+                        ->whereIn('id', $detail->measurements_array)
+                        //->orderBy('order_measurements')
+                        ->pluck('name', 'id')
+                        ->toArray();
+                }
+            });
+        }
+
+        return $record;
     }
 
     protected function calculate($selected, $variable, $lastMonth = false): int

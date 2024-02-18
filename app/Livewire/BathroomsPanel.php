@@ -50,6 +50,8 @@ class BathroomsPanel extends Component implements HasForms
         }
 
         $this->data[$this->relationName] = $items;
+
+        $this->addBathroomCheck();
     }
 
     public function render(): View|Application|Factory|\Illuminate\Contracts\Foundation\Application

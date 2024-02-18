@@ -167,12 +167,12 @@ tr .fi-ta-cell:first-child > div:first-child,
 }
 
 /*.fi-section-content,*/
-.fi-section:not(.fi-aside),
+/*.fi-section:not(.fi-aside),
 .fi-fo-tabs,
 .fi-fo-repeater-item,
 .fi-fo-field-info-values {
-    @apply !shadow-sm !border-0 !ring-1 !ring-gray-950/5  dark:!ring-white/10 /*focus-within:!ring-primary-600 transition-all ease-in duration-200*/;
-}
+    @apply !shadow-sm !border-0 !ring-1 !ring-gray-950/5  dark:!ring-white/10 !*focus-within:!ring-primary-600 transition-all ease-in duration-200*!;
+}*/
 
 .fi-fo-repeater-item-header > h4 {
     @apply !leading-8 !grow;

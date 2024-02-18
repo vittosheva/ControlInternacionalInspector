@@ -283,7 +283,6 @@ class InspectionResource extends Resource
                 ActionGroup::make([
                     ActionGroup::make([
                         EditAction::make()
-                            ->authorize(fn ($record) => $record->admin_authorization)
                             ->visible(fn ($record) => $record->admin_authorization || auth()->user()->isAdmin()),
                         ViewAction::make(),
                     ])

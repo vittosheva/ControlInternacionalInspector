@@ -11,6 +11,7 @@ use Filament\Notifications\Notification;
 use Filament\Support\Colors\Color;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 trait InspectionTrait
 {
@@ -69,6 +70,9 @@ trait InspectionTrait
         }
     }
 
+    /**
+     * @throws Throwable
+     */
     protected function saveInDatabase(): void
     {
         $savedRecord = $this->getRecord();

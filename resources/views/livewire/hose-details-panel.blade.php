@@ -36,7 +36,7 @@
                                             <td class="px-4 py-3">{{ $item->observation->name ?? '-' }}</td>
                                             <td class="px-4 py-3 text-right">{{ $item->totalizator ?? '-' }}</td>
                                             <td class="px-4 py-3 text-center">{{ $item->measurement->name ?? '-' }}</td>
-                                            <td class="px-4 py-3 text-center">{{ $item->measurement2->name ?? '-' }}</td>
+                                            <td class="px-4 py-3 text-center">{{ $item->measurements_array ?? '-' }}</td>
                                             <td class="px-4 py-3">{{ $item->observationCompany->name ?? '-' }}</td>
                                         </tr>
                                         @empty

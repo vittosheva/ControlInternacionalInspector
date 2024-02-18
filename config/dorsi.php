@@ -12,7 +12,7 @@ return [
     'project_long_name' => 'Inspección - Control Internacional',
     'meta_description' => 'Control Internacional es el sistema de registro de inspecciones a estaciones de servicios.',
     'project_description' => '',
-    'project_logo' => 'img/control-internacional-logo.png',
+    'project_logo' => 'img/ci-logo.png',
     'project_favicon' => 'favicon.png',
     'project_email' => 'sender@dorsisoft.com',
     'project_email_noreply' => 'noreply@dorsisoft.com',

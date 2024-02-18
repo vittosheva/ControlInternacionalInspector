@@ -47,6 +47,7 @@ class MainPanelProvider extends PanelProvider
             ->passwordReset()
             ->profile(null)
             ->brandLogo(asset(config('dorsi.project_logo')))
+            ->brandLogoHeight('3rem')
             ->favicon(asset(config('dorsi.project_favicon')))
             ->middleware([
                 EncryptCookies::class,

@@ -234,12 +234,12 @@ namespace App\Models\Core{
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companies
  * @property-read int|null $companies_count
- * @property-read \App\Models\Core\Company $company
+ * @property-read \App\Models\Core\Company|null $company
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companyUser
  * @property-read int|null $company_user_count
- * @property-read \App\Models\Persona\User $creator
- * @property-read \App\Models\Persona\User $destroyer
- * @property-read \App\Models\Persona\User $editor
+ * @property-read \App\Models\Persona\User|null $creator
+ * @property-read \App\Models\Persona\User|null $destroyer
+ * @property-read \App\Models\Persona\User|null $editor
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Persona\User> $employeeships
  * @property-read int|null $employeeships_count
  * @property-read \App\Models\Core\Company|null $latestCompany
@@ -289,7 +289,12 @@ namespace App\Models\Core{
  * @property-read \App\Models\Persona\User|null $creator
  * @property-read \App\Models\Persona\User|null $destroyer
  * @property-read \App\Models\Persona\User|null $editor
+ * @property-read mixed $extension
+ * @property-read mixed $human_readable_size
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $model
+ * @property-read mixed $original_url
+ * @property-read mixed $preview_url
+ * @property-read mixed $type
  * @method static \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, static> all($columns = ['*'])
  * @method static \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, static> get($columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Builder|Media newModelQuery()
@@ -678,6 +683,7 @@ namespace App\Models\Inspections{
  * @property int|null $measurement_id Measurement identifier
  * @property int|null $measurement_id_sec_1 Measurement secundary 1 identifier
  * @property int|null $measurement_id_sec_2 Measurement secundary 2 identifier
+ * @property string|null $measurements_array
  * @property int|null $observation_id Observation identifier
  * @property int|null $company_observation_id Observation identifier
  * @property int|null $letter_responsable_id Letter responsable identifier
@@ -709,6 +715,7 @@ namespace App\Models\Inspections{
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordDetail whereMeasurementId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordDetail whereMeasurementIdSec1($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordDetail whereMeasurementIdSec2($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordDetail whereMeasurementsArray($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordDetail whereObservationId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordDetail whereObservations($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ControlRecordDetail whereOctane($value)
@@ -935,7 +942,7 @@ namespace App\Models\Inspections{
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \OwenIt\Auditing\Models\Audit> $audits
  * @property-read int|null $audits_count
- * @property-read \App\Models\Inspections\Hose $hose
+ * @property-read \App\Models\Inspections\Hose|null $hose
  * @method static \Illuminate\Database\Eloquent\Builder|HoseType newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|HoseType newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|HoseType query()
@@ -1231,15 +1238,15 @@ namespace App\Models\Inventory{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \OwenIt\Auditing\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \App\Models\Inventory\Category|null $category
- * @property-read \App\Models\Common\CategoryType $categoryType
+ * @property-read \App\Models\Common\CategoryType|null $categoryType
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companies
  * @property-read int|null $companies_count
- * @property-read \App\Models\Core\Company $company
+ * @property-read \App\Models\Core\Company|null $company
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companyUser
  * @property-read int|null $company_user_count
- * @property-read \App\Models\Persona\User $creator
- * @property-read \App\Models\Persona\User $destroyer
- * @property-read \App\Models\Persona\User $editor
+ * @property-read \App\Models\Persona\User|null $creator
+ * @property-read \App\Models\Persona\User|null $destroyer
+ * @property-read \App\Models\Persona\User|null $editor
  * @property-read \App\Models\Core\Company|null $latestCompany
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \App\Models\Core\Media> $media
  * @property-read int|null $media_count
@@ -1272,15 +1279,15 @@ namespace App\Models\Inventory{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \OwenIt\Auditing\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \App\Models\Inventory\Category|null $category
- * @property-read \App\Models\Common\CategoryType $categoryType
+ * @property-read \App\Models\Common\CategoryType|null $categoryType
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companies
  * @property-read int|null $companies_count
- * @property-read \App\Models\Core\Company $company
+ * @property-read \App\Models\Core\Company|null $company
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companyUser
  * @property-read int|null $company_user_count
- * @property-read \App\Models\Persona\User $creator
- * @property-read \App\Models\Persona\User $destroyer
- * @property-read \App\Models\Persona\User $editor
+ * @property-read \App\Models\Persona\User|null $creator
+ * @property-read \App\Models\Persona\User|null $destroyer
+ * @property-read \App\Models\Persona\User|null $editor
  * @property-read \App\Models\Core\Company|null $latestCompany
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \App\Models\Core\Media> $media
  * @property-read int|null $media_count
@@ -1317,7 +1324,7 @@ namespace App\Models\Inventory{
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companies
  * @property-read int|null $companies_count
- * @property-read \App\Models\Core\Company $company
+ * @property-read \App\Models\Core\Company|null $company
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companyUser
  * @property-read int|null $company_user_count
  * @property-read \App\Models\Persona\User|null $creator
@@ -1327,6 +1334,7 @@ namespace App\Models\Inventory{
  * @property-read \App\Models\Setting\ResourceLock|null $resourceLock
  * @property \Illuminate\Database\Eloquent\Collection<int, Tag> $tags
  * @property-read int|null $tags_count
+ * @property-read mixed $translations
  * @method static \Illuminate\Database\Eloquent\Builder|Tag containing(string $name, $locale = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Tag newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Tag newQuery()
@@ -1467,12 +1475,12 @@ namespace App\Models\Locale{
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companies
  * @property-read int|null $companies_count
- * @property-read \App\Models\Core\Company $company
+ * @property-read \App\Models\Core\Company|null $company
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companyUser
  * @property-read int|null $company_user_count
- * @property-read \App\Models\Persona\User $creator
- * @property-read \App\Models\Persona\User $destroyer
- * @property-read \App\Models\Persona\User $editor
+ * @property-read \App\Models\Persona\User|null $creator
+ * @property-read \App\Models\Persona\User|null $destroyer
+ * @property-read \App\Models\Persona\User|null $editor
  * @property-read \App\Models\Core\Company|null $latestCompany
  * @method static \Illuminate\Database\Eloquent\Builder|Currency newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Currency newQuery()
@@ -1570,19 +1578,19 @@ namespace App\Models\Persona{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Rappasoft\LaravelAuthenticationLog\Models\AuthenticationLog> $authentications
  * @property-read int|null $authentications_count
  * @property-read \App\Models\Inventory\Category|null $category
- * @property-read \App\Models\Common\CategoryType $categoryType
+ * @property-read \App\Models\Common\CategoryType|null $categoryType
  * @property-read \App\Models\Locale\City|null $city
  * @property-read Customer|null $client
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companies
  * @property-read int|null $companies_count
- * @property-read \App\Models\Core\Company $company
+ * @property-read \App\Models\Core\Company|null $company
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companyUser
  * @property-read int|null $company_user_count
- * @property-read \App\Models\Locale\Country $country
- * @property-read \App\Models\Persona\User $creator
+ * @property-read \App\Models\Locale\Country|null $country
+ * @property-read \App\Models\Persona\User|null $creator
  * @property-read Customer|null $customer
- * @property-read \App\Models\Persona\User $destroyer
- * @property-read \App\Models\Persona\User $editor
+ * @property-read \App\Models\Persona\User|null $destroyer
+ * @property-read \App\Models\Persona\User|null $editor
  * @property-read \App\Models\Persona\User|null $employee
  * @property-read \Rappasoft\LaravelAuthenticationLog\Models\AuthenticationLog|null $latestAuthentication
  * @property-read \App\Models\Core\Company|null $latestCompany
@@ -1595,7 +1603,7 @@ namespace App\Models\Persona{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read int|null $roles_count
  * @property-read \App\Models\Persona\User|null $salesperson
- * @property-read \App\Models\Locale\State $state
+ * @property-read \App\Models\Locale\State|null $state
  * @method static \Illuminate\Database\Eloquent\Builder|Customer newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Customer newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Customer onlyCreatedByMe()
@@ -1665,7 +1673,7 @@ namespace App\Models\Persona{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Rappasoft\LaravelAuthenticationLog\Models\AuthenticationLog> $authentications
  * @property-read int|null $authentications_count
  * @property-read \App\Models\Inventory\Category|null $category
- * @property-read \App\Models\Common\CategoryType $categoryType
+ * @property-read \App\Models\Common\CategoryType|null $categoryType
  * @property-read \App\Models\Locale\City|null $city
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companies
  * @property-read int|null $companies_count
@@ -1762,12 +1770,12 @@ namespace App\Models\Setting{
  *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companies
  * @property-read int|null $companies_count
- * @property-read \App\Models\Core\Company $company
+ * @property-read \App\Models\Core\Company|null $company
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companyUser
  * @property-read int|null $company_user_count
  * @property-read \App\Models\Core\Company|null $latestCompany
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $lockable
- * @property-read \App\Models\Persona\User $user
+ * @property-read \App\Models\Persona\User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder|ResourceLock newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|ResourceLock newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|ResourceLock query()
@@ -1783,12 +1791,12 @@ namespace App\Models\Setting{
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companies
  * @property-read int|null $companies_count
- * @property-read \App\Models\Core\Company $company
+ * @property-read \App\Models\Core\Company|null $company
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Core\Company> $companyUser
  * @property-read int|null $company_user_count
- * @property-read \App\Models\Persona\User $creator
- * @property-read \App\Models\Persona\User $destroyer
- * @property-read \App\Models\Persona\User $editor
+ * @property-read \App\Models\Persona\User|null $creator
+ * @property-read \App\Models\Persona\User|null $destroyer
+ * @property-read \App\Models\Persona\User|null $editor
  * @property-read \App\Models\Core\Company|null $latestCompany
  * @property-read \App\Models\Setting\ResourceLock|null $resourceLock
  * @method static \Illuminate\Database\Eloquent\Builder|Unit newModelQuery()

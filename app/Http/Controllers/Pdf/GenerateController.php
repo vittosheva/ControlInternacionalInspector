@@ -8,6 +8,7 @@ use App\Models\Inspections\ComplementaryService;
 use App\Models\Inspections\ControlRecord;
 use App\Models\Inspections\EnvironmentalObservation;
 use App\Models\Inspections\InspectionSetting;
+use App\Models\Inspections\Measurement;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Jenssegers\Optimus\Optimus;
@@ -18,7 +19,7 @@ use function Spatie\LaravelPdf\Support\pdf;
 
 class GenerateController extends Controller
 {
-    public ?Model $document;
+    public ?Model $record;
 
     public function __construct(protected Optimus $optimus)
     {
@@ -27,7 +28,7 @@ class GenerateController extends Controller
 
     public function handle($record)
     {
-        $this->document = ControlRecord::query()
+        $this->record = ControlRecord::query()
             ->with([
                 'company',
                 'station' => [
@@ -51,18 +52,28 @@ class GenerateController extends Controller
             ->find($this->optimus->decode($record));
 
         abort_if(
-            empty($this->document) || empty($this->document->details),
+            empty($this->record) || empty($this->record->details),
             Response::HTTP_NOT_FOUND, __('Error there is no document')
         );
 
+        $this->record->details->map(function ($detail) {
+            if (! empty($detail->measurements_array) && is_array($detail->measurements_array)) {
+                $detail->measurements_array = Measurement::query()
+                    ->whereIn('id', $detail->measurements_array)
+                    //->orderBy('order_measurements')
+                    ->pluck('name')
+                    ->implode(', ');
+            }
+        });
+
         $data = [
-            'record' => $this->document,
+            'record' => $this->record,
             'inspectionSettings' => InspectionSetting::query()->pluck('name', 'id')->all(),
             'badHoses' => 0,
             'complementaryServices' => ComplementaryService::all()->pluck('description', 'id')->all(),
             'environmentalObservations' => EnvironmentalObservation::all()->pluck('description', 'id')->all(),
             'bathroomComplianceObservations' => BathroomComplianceObservation::all()->pluck('description', 'id')->all(),
-            'checkMark' => '✓', // ✓ |
+            'checkMark' => '✓',
             'wrongMark' => '-',
         ];
 
@@ -79,8 +90,8 @@ class GenerateController extends Controller
             ->format(Format::A4)
             ->margins(1, 3, 1, 3);
 
-        $this->document->inspection_report_pdf = $name.'.pdf';
-        $this->document->save();
+        $this->record->inspection_report_pdf = $name.'.pdf';
+        $this->record->save();
 
         if (request()->has('download')) {
             return $pdf->download($name);
@@ -99,9 +110,9 @@ class GenerateController extends Controller
     {
         return collect()
             ->push('inspeccion')
-            ->push(Str::of($this->document->company->name)->slug()->toString())
-            ->push(Str::of($this->document->station->name)->slug()->toString())
-            ->push($this->document->inspection_date->format('d-m-Y'))
+            ->push(Str::of($this->record->company->name)->slug()->toString())
+            ->push(Str::of($this->record->station->name)->slug()->toString())
+            ->push($this->record->inspection_date->format('d-m-Y'))
             ->implode('-');
     }
 }

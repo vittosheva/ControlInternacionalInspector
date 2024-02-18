@@ -28,7 +28,7 @@ class BathroomComplianceObservationResource extends Resource
 {
     protected static ?string $model = BathroomComplianceObservation::class;
 
-    protected static ?string $navigationIcon = 'lucide-bath';
+    protected static ?string $navigationIcon = 'lucide-shower-head';
 
     protected static ?int $navigationSort = 5;
 
