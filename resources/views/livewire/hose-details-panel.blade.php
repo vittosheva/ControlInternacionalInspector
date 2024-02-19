@@ -25,25 +25,27 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                    @if(! empty($record->details))
                                         @forelse ($record->details as $item)
-                                        <tr class="border-b dark:border-gray-700">
-                                            <td class="px-4 py-3">{{ $loop->iteration }}</td>
-                                            <td class="px-4 py-3">{{ $item->hose->name }}</td>
-                                            <td class="px-4 py-3 text-center">{{ $item->seal_found }}</td>
-                                            <td class="px-4 py-3 text-center">{{ $item->seal_left }}</td>
-                                            <td class="px-4 py-3 text-right">{{ $item->quantity ?? '-' }}</td>
-                                            <td class="px-4 py-3 text-right">{{ $item->octane ?? '-' }}</td>
-                                            <td class="px-4 py-3">{{ $item->observation->name ?? '-' }}</td>
-                                            <td class="px-4 py-3 text-right">{{ $item->totalizator ?? '-' }}</td>
-                                            <td class="px-4 py-3 text-center">{{ $item->measurement->name ?? '-' }}</td>
-                                            <td class="px-4 py-3 text-center">{{ $item->measurements_array ?? '-' }}</td>
-                                            <td class="px-4 py-3">{{ $item->observationCompany->name ?? '-' }}</td>
-                                        </tr>
+                                            <tr class="border-b dark:border-gray-700">
+                                                <td class="px-4 py-3">{{ $loop->iteration }}</td>
+                                                <td class="px-4 py-3">{{ $item->hose->name }}</td>
+                                                <td class="px-4 py-3 text-center">{{ $item->seal_found }}</td>
+                                                <td class="px-4 py-3 text-center">{{ $item->seal_left }}</td>
+                                                <td class="px-4 py-3 text-right">{{ $item->quantity ?? '-' }}</td>
+                                                <td class="px-4 py-3 text-right">{{ $item->octane ?? '-' }}</td>
+                                                <td class="px-4 py-3">{{ $item->observation->name ?? '-' }}</td>
+                                                <td class="px-4 py-3 text-right">{{ $item->totalizator ?? '-' }}</td>
+                                                <td class="px-4 py-3 text-center">{{ $item->measurement->name ?? '-' }}</td>
+                                                <td class="px-4 py-3 text-center">{{ $item->measurements_array ?? '-' }}</td>
+                                                <td class="px-4 py-3">{{ $item->observationCompany->name ?? '-' }}</td>
+                                            </tr>
                                         @empty
                                             <tr class="border-b dark:border-gray-700">
                                                 <td class="px-4 py-3 text-center" colspan="11">No existen registros de inspección</td>
                                             </tr>
                                         @endforelse
+                                    @endif
                                     </tbody>
                                 </table>
                             </div>

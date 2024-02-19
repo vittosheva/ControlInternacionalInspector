@@ -17,8 +17,12 @@ class HoseDetailsPanel extends Component
 
     public ?ControlRecord $record;
 
-    public function mount($record): void
+    public function mount($record = null): void
     {
+        if (empty($record)) {
+            return;
+        }
+
         $this->record = $record->load([
             'details' => [
                 'hose',

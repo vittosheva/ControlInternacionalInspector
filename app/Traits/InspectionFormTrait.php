@@ -240,9 +240,9 @@ trait InspectionFormTrait
                         'record' => $record,
                     ],
                 ])
-                ->visible(fn ($operation) => $operation === 'view' || auth()->user()->isAdmin()),
+                ->visible(fn ($operation) => $operation !== 'create'),
             HrPlaceholder::make('')
-                ->visible(fn ($operation) => $operation === 'view' && auth()->user()->isAdmin()),
+                ->visible(fn ($operation) => $operation !== 'create'),
             Grid::make()
                 ->schema([
                     Checkbox::make('do_not_update')
@@ -254,10 +254,10 @@ trait InspectionFormTrait
                         ->columnSpanFull(),
                 ])
                 ->extraAttributes(['class' => 'flex items-center justify-center'])
-                ->visible(fn ($operation) => $operation === 'edit')
+                ->visible(fn ($operation) => $operation === 'edit' && auth()->user()->isAdmin())
                 ->columns(1),
             HrPlaceholder::make('')
-                ->visible(fn ($operation) => $operation === 'edit'),
+                ->visible(fn ($operation) => $operation === 'edit' && auth()->user()->isAdmin()),
             Livewire::make(HosesPanel::class, [
                 'operation' => $operation,
                 'companyId' => $get('company_id'),
