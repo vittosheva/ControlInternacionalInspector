@@ -1,0 +1,76 @@
+{
+    "name": "cybercog/laravel-optimus",
+    "description": "An Optimus bridge for Laravel. Id obfuscation based on Knuth's multiplicative hashing method.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "cybercog",
+        "cog",
+        "laravel",
+        "optimus",
+        "hashids",
+        "id",
+        "encrypt",
+        "decrypt",
+        "obfuscate",
+        "url",
+        "uri",
+        "public-id"
+    ],
+    "authors": [
+        {
+            "name": "Anton Komarev",
+            "email": "anton@komarev.com",
+            "homepage": "https://komarev.com",
+            "role": "Developer"
+        }
+    ],
+    "homepage": "https://komarev.com/sources/laravel-optimus",
+    "support": {
+        "email": "anton@komarev.com",
+        "issues": "https://github.com/cybercog/laravel-optimus/issues",
+        "wiki": "https://github.com/cybercog/laravel-optimus/wiki",
+        "source": "https://github.com/cybercog/laravel-optimus",
+        "docs": "https://github.com/cybercog/laravel-optimus/wiki"
+    },
+    "require": {
+        "php": "^7.4|^8.0",
+        "graham-campbell/manager": "^5.0",
+        "illuminate/contracts": "^8.0|^9.0|^10.0",
+        "illuminate/support": "^8.0|^9.0|^10.0",
+        "jenssegers/optimus": "^0.2.2"
+    },
+    "require-dev": {
+        "graham-campbell/testbench": "^6.0",
+        "mockery/mockery": "^1.0",
+        "phpunit/phpunit": "^9.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cog\\Laravel\\Optimus\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Cog\\Tests\\Laravel\\Optimus\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Cog\\Laravel\\Optimus\\Providers\\OptimusServiceProvider"
+            ],
+            "aliases": {
+                "Optimus": "Cog\\Laravel\\Optimus\\Facades\\Optimus"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable" : true
+}

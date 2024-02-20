@@ -1,0 +1,51 @@
+{
+    "name": "moox/jobs",
+    "description": "Manage Job Queues, Failed Jobs and Batches in Filament.",
+    "keywords": [
+        "laravel",
+        "filament",
+        "jobs",
+        "queues",
+        "failed-jobs",
+        "batches",
+        "monitor",
+        "redis"
+    ],
+    "homepage": "https://github.com/mooxphp/jobs",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alf Drollinger",
+            "email": "alf@drollinger.info",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.0.2",
+        "spatie/laravel-package-tools": "^1.9.2",
+        "invaders-xx/filament-jsoneditor": "^3.0",
+        "filament/filament": "^3.0"
+    },
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "Moox\\Jobs\\": "src"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Moox\\Jobs\\JobsServiceProvider",
+                "Moox\\Jobs\\JobManagerProvider"
+            ],
+            "aliases": {
+                "JobMonitor": "Moox\\Jobs\\JobManagerProvider\\Facade"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
