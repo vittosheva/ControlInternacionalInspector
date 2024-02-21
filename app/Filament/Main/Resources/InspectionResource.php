@@ -160,7 +160,7 @@ class InspectionResource extends Resource
                     ->visible(auth()->user()->isAdmin()),
                 TextColumn::make('month')
                     ->label(__('Month'))
-                    ->formatStateUsing(fn ($state) => ucfirst(Date::parse($state)->format('F')))
+                    ->formatStateUsing(fn ($state) => dd($state))
                     ->sortable()
                     ->visible(auth()->user()->isAdmin()),
                 TextColumn::make('creator.name')
