@@ -41,6 +41,7 @@ use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Jenssegers\Date\Date;
 
 class InspectionResource extends Resource
@@ -160,7 +161,8 @@ class InspectionResource extends Resource
                     ->visible(auth()->user()->isAdmin()),
                 TextColumn::make('month')
                     ->label(__('Month'))
-                    ->formatStateUsing(fn ($state) => dd($state))
+                    //->formatStateUsing(fn ($state) => ucfirst(Date::parse($state)->format('F')))
+                    ->formatStateUsing(fn ($state) => Carbon::create()->day(1)->month($state))
                     ->sortable()
                     ->visible(auth()->user()->isAdmin()),
                 TextColumn::make('creator.name')
