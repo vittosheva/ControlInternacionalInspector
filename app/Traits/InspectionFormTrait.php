@@ -182,7 +182,8 @@ trait InspectionFormTrait
                             ->find($get('station_id'), ['id', 'street']);
 
                         if (! empty($street->street)) {
-                            return $street->getAttributeValue('street');
+                            return $street->street;
+                            //return $street->getAttributeValue('street');
                         }
 
                         return $set('address', 'Sin dirección');

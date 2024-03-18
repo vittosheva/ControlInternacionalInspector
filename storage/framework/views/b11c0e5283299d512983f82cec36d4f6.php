@@ -1,1 +1,0 @@
-<?php echo app('Illuminate\Foundation\Vite')('resources/css/app.css'); ?><?php /**PATH /Users/vittoriodormi/Desktop/VITTOSHEVA/GitHub/LARAVEL/Clients/ControlInternacionalInspector/storage/framework/views/7a4079328951d65cae376931033fc1f5.blade.php ENDPATH**/ ?>

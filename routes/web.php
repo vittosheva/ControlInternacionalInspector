@@ -20,4 +20,16 @@ Route::domain(config('dorsi.project_url_homepage'))->group(function () {
         Route::get('generate/{record}/{document?}', [GenerateController::class, 'handle'])->middleware('auth:web')->name('generate');
         Route::get('view/{record}', [ViewController::class, 'handle'])->name('view');
     });
+
+    Route::get('optimize-clear', function () {
+        \Artisan::call('optimize:clear');
+        \Artisan::call('filament:clear-cached-components');
+    });
+    
+    Route::get('optimize', function () {
+        \Artisan::call('optimize');
+        \Artisan::call('view:cache');
+        \Artisan::call('event:cache');
+        \Artisan::call('filament:cache-components');
+    });
 });
