@@ -29,6 +29,7 @@
         "awcodes/filament-quick-create": "^3.3",
         "awcodes/filament-table-repeater": "^2.1.1",
         "awcodes/filament-tiptap-editor": "^3.2.23",
+        "barryvdh/laravel-dompdf": "^2.1",
         "cms-multi/filament-clear-cache": "^2.0.4",
         "coolsam/flatpickr": "^3.0.1",
         "cybercog/laravel-optimus": "^3.10",

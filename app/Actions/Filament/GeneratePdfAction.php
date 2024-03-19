@@ -26,7 +26,7 @@ class GeneratePdfAction extends Action
             ->url(fn (Model $record, Optimus $optimus) => route('pdf.generate', [
                 'record' => $optimus->encode($record->getAttributeValue('id')),
                 'document' => $record->getAttributeValue('document_code'),
-            ]),
+            ]).'?html',
                 shouldOpenInNewTab: true
             );
     }

@@ -10,16 +10,19 @@ use App\Models\Inspections\EnvironmentalObservation;
 use App\Models\Inspections\InspectionSetting;
 use App\Models\Inspections\Measurement;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Jenssegers\Optimus\Optimus;
 use Spatie\LaravelPdf\Enums\Format;
 use Symfony\Component\HttpFoundation\Response;
 
 use function Spatie\LaravelPdf\Support\pdf;
+use Barryvdh\DomPDF\Facade\Pdf as DomPdf;
 
 class GenerateController extends Controller
 {
     public ?Model $record;
+    public string $renderMethod = 'domPdf'; // laravelPdf
 
     public function __construct(protected Optimus $optimus)
     {
@@ -53,7 +56,8 @@ class GenerateController extends Controller
 
         abort_if(
             empty($this->record) || empty($this->record->details),
-            Response::HTTP_NOT_FOUND, __('Error there is no document')
+            Response::HTTP_NOT_FOUND,
+            __('Error there is no document')
         );
 
         $this->record->details->map(function ($detail) {
@@ -77,20 +81,24 @@ class GenerateController extends Controller
             'wrongMark' => '-',
         ];
 
+        $html = view('pdf.inspection', $data);
+
         if (request()->has('html')) {
-            return view('pdf.inspection', $data);
+            return $html;
         }
 
-        $name = $this->getFileName();
+        $name = $this->getFileName().'.pdf';
+        $renderMethod = $this->renderMethod;
 
-        $pdf = pdf()
-            ->view('pdf.inspection', $data)
-            ->name($name.'.pdf')
-            ->landscape()
-            ->format(Format::A4)
-            ->margins(1, 3, 1, 3);
+        if ($renderMethod == 'domPdf') {
+            $pdf = $this->domPdf($data, $name);
+        } else if ($renderMethod == 'laravelPdf') {
+            $pdf = $this->laravelPdf($data, $name);
+        } else {
+            abort(Response::HTTP_NOT_FOUND, __('Error there is no template'));
+        }
 
-        $this->record->inspection_report_pdf = $name.'.pdf';
+        $this->record->inspection_report_pdf = $name;
         $this->record->save();
 
         if (request()->has('download')) {
@@ -98,12 +106,42 @@ class GenerateController extends Controller
         }
 
         if (request()->has('view')) {
+            if ($renderMethod == 'domPdf') {
+                return $pdf->stream($name);
+            }
+            
             return $pdf;
+        }
+
+        if ($renderMethod == 'domPdf') {
+            Storage::disk('inspections_pdf')->put($name, $pdf->stream());
+            return $pdf->stream($name);
         }
 
         return $pdf
             ->disk('inspections_pdf')
-            ->save($name.'.pdf');
+            ->save($name);
+    }
+
+    protected function domPdf($data, $name, $template = 'pdf.inspection')
+    {
+        return DomPdf::loadView($template, $data)
+            ->setPaper('a4', 'landscape')
+            ->setWarnings(false)
+            ->setOption([
+                'dpi' => 150, 
+                'defaultFont' => 'sans-serif',
+            ]);
+    }
+
+    protected function laravelPdf($data, $name, $template = 'pdf.inspection')
+    {
+        return pdf()
+            ->view($template, $data)
+            ->name($name)
+            ->landscape()
+            ->format(Format::A4)
+            ->margins(1, 3, 1, 3);
     }
 
     protected function getFileName(): string

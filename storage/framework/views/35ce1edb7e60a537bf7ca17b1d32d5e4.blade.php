@@ -1,1 +1,0 @@
-<x-filament::link :href="filament()->getRequestPasswordResetUrl()"> ¿Ha olvidado su contraseña?</x-filament::link>
